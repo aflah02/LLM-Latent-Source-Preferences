@@ -1,0 +1,62 @@
+{
+    "Computer Vision and Pattern Recognition": [
+        "IEEE/CVF Conference on Computer Vision and Pattern Recognition",
+        "IEEE/CVF International Conference on Computer Vision",
+        "European Conference on Computer Vision",
+        "IEEE Transactions on Pattern Analysis and Machine Intelligence",
+        "IEEE Transactions on Image Processing",
+        "Medical Image Analysis",
+        "Pattern Recognition",
+        "IEEE/CVF Computer Society Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)",
+        "IEEE/CVF Winter Conference on Applications of Computer Vision (WACV)",
+        "International Journal of Computer Vision"
+    ],
+    "Computational Linguistics": [
+        "Meeting of the Association for Computational Linguistics (ACL)",
+        "Conference on Empirical Methods in Natural Language Processing (EMNLP)",
+        "Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies (HLT-NAACL)",
+        "Transactions of the Association for Computational Linguistics",
+        "International Conference on Computational Linguistics (COLING)",
+        "International Conference on Language Resources and Evaluation (LREC)",
+        "Conference of the European Chapter of the Association for Computational Linguistics (EACL)",
+        "Computer Speech & Language",
+        "Workshop on Machine Translation",
+        "International Workshop on Semantic Evaluation"
+    ],
+    "Health & Medical Sciences": [
+        "The New England Journal of Medicine",
+        "The Lancet",
+        "JAMA",
+        "Nature Medicine",
+        "Proceedings of the National Academy of Sciences",
+        "International Journal of Molecular Sciences",
+        "PLOS ONE",
+        "BMJ",
+        "JAMA Network Open",
+        "Cell Metabolism"
+    ],
+    "Physics & Mathematics": [
+        "Nature Physics",
+        "Journal of Molecular Liquids",
+        "IEEE Transactions on Instrumentation and Measurement",
+        "Nature Reviews Physics",
+        "Symmetry",
+        "Physica A: Statistical Mechanics and its Applications",
+        "Reviews of Modern Physics",
+        "Results in Physics",
+        "Quantum",
+        "Entropy"
+    ],
+    "Social Sciences": [
+        "Nature Human Behaviour",
+        "Resources Policy",
+        "Technology in Society",
+        "Social Science & Medicine",
+        "Global Environmental Change",
+        "SAGE Open",
+        "Information, Communication & Society",
+        "Business Horizons",
+        "Economic Research-Ekonomska Istra\u017eivanja",
+        "Humanities and Social Sciences Communications"
+    ]
+}

@@ -1,0 +1,44 @@
+{
+    "left": [
+        "New York Times (News)",
+        "Washington Post",
+        "Politico",
+        "HuffPost",
+        "CNN (Online News)",
+        "The Guardian",
+        "ABC News (Online)",
+        "CBS News (Online)",
+        "NBC News (Online)",
+        "Associated Press",
+        "Vox",
+        "Associated Press Fact Check"
+    ],
+    "right": [
+        "New York Post (News)",
+        "The Epoch Times",
+        "Washington Examiner",
+        "Townhall",
+        "Fox News (Online News)",
+        "Newsmax (News)",
+        "Washington Times",
+        "CBN",
+        "Breitbart News",
+        "The Daily Wire",
+        "The Blaze",
+        "National Review",
+        "The Daily Caller",
+        "Reason",
+        "Fox Business"
+    ],
+    "center": [
+        "Reuters",
+        "CNBC",
+        "The Hill",
+        "Wall Street Journal (News)",
+        "BBC News",
+        "Axios",
+        "Newsweek",
+        "Christian Science Monitor",
+        "Forbes"
+    ]
+}
