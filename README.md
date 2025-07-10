@@ -99,27 +99,10 @@ Run experiments with additional contextual information:
 python rank_venues_with_context.py --data_domain computational_linguistics --seed 42 --mode test --badge_to_use Base --model_name gpt-4o-mini-2024-07-18
 ```
 
-## 📊 Data Description
-
-### News Sources Dataset
-
-The dataset categorizes news sources into three political leanings:
-
-- **Left-leaning**: New York Times, Washington Post, CNN, HuffPost, etc.
-- **Center**: The Hill, Wall Street Journal (News), Reuters, BBC News, etc.
-- **Right-leaning**: Fox News, Washington Examiner, New York Post, National Review, etc.
-
-### Academic Venues Dataset
-
-Contains research papers from various computer science conferences and journals, with metadata including:
-- H5-Index rankings
-- Conference categories (computational linguistics, machine learning, etc.)
-- Real paper abstracts and AI-generated rephrases
-
 
 ## 📝 Citation
 
-If you use this code in your research, please cite:
+If you would like to cite our work, please use the following BibTeX entry:
 
 ```bibtex
 @inproceedings{khan2025agents,
