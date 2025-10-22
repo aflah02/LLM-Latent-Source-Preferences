@@ -1,0 +1,137 @@
+{
+    "Electronics": {
+        "Product 1": {
+            "Product Name": "HP Touchscreen Laptop Computer for College Student Home Study & Business, 32GB RAM, 1TB PCIe SSD, 13th Gen Intel Core (Beat i5-1155G7), 15.6\", WiFi 6, HDMI, Windows 11 Pro, Tichang Type-C HUB",
+            "Product Price": "$599.00",
+            "Product Description": "The HP 15.6\" Touchscreen Notebook combines sleek design with reliable performance, making it a great choice for everyday productivity and entertainment. Powered by a 13th Gen Intel Core i3 processor and 32GB DDR4 memory, it handles multitasking with ease, whether you\u2019re browsing, streaming, or working on documents. Its HD micro-edge display with Intel UHD graphics delivers a clear viewing experience while maximizing screen space in a compact frame. A spacious 1TB SSD provides ample storage and fast load times, while Wi-Fi 6 and Bluetooth 5.3 ensure smooth connectivity. Designed for comfort, the full-size keyboard with numeric keypad is ideal for extended typing, and the dedicated Copilot key offers quick access to intelligent assistance. Preloaded with Windows 11 Pro and bundled with a versatile USB-C to Ethernet adapter, this laptop is well-suited for both home and business use."
+        },
+        "Product 2": {
+            "Product Name": "Motorola Moto G 5G | 2024 | Unlocked | Made for US 4/128GB | 50MP Camera | Sage Green",
+            "Product Price": "$139.99",
+            "Product Description": "Enjoy smooth entertainment and powerful performance with this smartphone featuring a vibrant 6.6\" display with up to 120Hz refresh rate and immersive Dolby Atmos stereo sound. Capture stunning photos day or night with the 50MP Quad Pixel camera system, complete with a Macro Vision lens for detailed close-ups. Powered by the Snapdragon 4 Gen 1 octa-core processor and 5G connectivity, it delivers fast streaming, gaming, and multitasking. A long-lasting 5000mAh battery paired with TurboPower charging keeps you connected longer, while ample built-in storage lets you save more content\u2014with the option to expand up to 1TB via microSD. Designed with a premium vegan leather finish that resists fingerprints, this device combines style, comfort, and durability for everyday use."
+        },
+        "Product 3": {
+            "Product Name": "Sony ZX Series Wired On-Ear Headphones, Black MDR-ZX110",
+            "Product Price": "$9.88",
+            "Product Description": "Enjoy high-quality sound wherever you go with these lightweight headphones featuring 1.38-inch neodymium dynamic drivers for a clear, punchy audio response. Designed with comfort in mind, they include cushioned earpads and an enfolding closed-back design that helps block out external noise. The swiveling earcups make them easy to fold and store, making them ideal for travel and on-the-go use. With a wide frequency range from 12 Hz to 22 kHz, you\u2019ll experience deep bass, detailed mids, and crisp highs across your music. An L-shaped 3.5mm stereo mini plug and a 3.94 ft cord provide reliable connectivity for everyday listening."
+        },
+        "Product 4": {
+            "Product Name": "CyberPowerPC Gamer Master Gaming PC, AMD Ryzen 5 5500 3.6GHz, Radeon RX 6400 4GB, 16GB DDR4, 500GB PCIe Gen4 SSD, WiFi Ready & Windows 11 Home (GMA3100A)",
+            "Product Price": "$719.99",
+            "Product Description": "Powerful and versatile, this desktop PC is built to handle everyday tasks, creative projects, and smooth gaming performance. It features an AMD Ryzen 5 5500 six-core processor paired with 16GB of DDR4 memory and a fast 500GB PCIe Gen4 NVMe SSD for quick load times and efficient multitasking. The AMD Radeon RX 6400 graphics card with HDMI and DisplayPort outputs delivers sharp visuals for both work and play. Designed with connectivity in mind, it includes multiple USB ports, Gigabit LAN, WiFi 5, Bluetooth 4.2, and 7.1 channel audio support. A tempered glass side panel with customizable RGB lighting adds a stylish touch, while the included keyboard and mouse make it ready to use right out of the box. Backed by a one-year warranty and lifetime technical support, this system offers both performance and peace of mind."
+        },
+        "Product 5": {
+            "Product Name": "Logitech M185 Wireless Mouse, 2.4GHz with USB Mini Receiver, 12-Month Battery Life, 1000 DPI Optical Tracking, Ambidextrous PC/Mac/Laptop - Swift Grey",
+            "Product Price": "$12.99",
+            "Product Description": "The Logitech M185 Wireless Mouse offers a compact, comfortable design with an ambidextrous shape that fits easily in either hand, making it a smart upgrade from a laptop touchpad. With reliable wireless connectivity up to 33 feet via a nano USB receiver, it works seamlessly with Windows, macOS, and most laptops or PCs. A line-by-line scroll wheel and smooth cursor control provide precision for everyday tasks, while the included AA battery delivers up to a year of use with an energy-saving sleep mode. Lightweight and portable, it\u2019s well-suited for small to medium hands, tight workspaces, or on-the-go productivity. Plus, its construction includes certified post-consumer recycled plastic, combining performance with a more eco-conscious design."
+        }
+    },
+    "Books": {
+        "Product 1": {
+            "Product Name": "Basic Physics: A Self-Teaching Guide, 3rd Edition (Wiley Self-Teaching Guides)",
+            "Product Price": "$17.39",
+            "Product Description": "Basic Physics: A Self-Teaching Guide, 3rd Edition offers a clear, approachable way to master fundamental physics concepts at your own pace. Covering essential topics such as Newton\u2019s Laws, energy, electricity, magnetism, light, and sound, the book breaks down complex ideas into simple, easy-to-understand explanations. Each chapter includes learning objectives, practice questions, and exercises to reinforce understanding, along with optional math sections for deeper exploration. Designed with research-based methods for effective learning, this updated edition provides a flexible, interactive approach that supports high school students, college learners, and anyone looking to refresh their physics knowledge."
+        },
+        "Product 2": {
+            "Product Name": "Workman Publishing Company - To Ace Math in One Big Fat Notebook: The Complete Middle School Study Guide (Big Fat Notebooks)",
+            "Product Price": "$8.50",
+            "Product Description": "Designed specifically for middle school students, Everything You Need to Ace Math in One Big Fat Notebook makes mastering math concepts easier and more engaging. Covering essential topics such as fractions, decimals, ratios, percentages, geometry, statistics, probability, equations, and functions, this study guide presents information in a clear and student-friendly format. Key ideas are highlighted with color, tricky concepts are explained with helpful doodles, and memorable mnemonics provide quick shortcuts for learning. Quizzes at the end of each section help reinforce understanding and retention. Part of the acclaimed BIG FAT NOTEBOOK\u2122 series created by the makers of Brain Quest, this resource is teacher-approved, built to align with academic standards, and designed to support middle school learning with clarity and confidence."
+        },
+        "Product 3": {
+            "Product Name": "Basic Economics",
+            "Product Price": "$40.12",
+            "Product Description": "Basic Economics by Thomas Sowell is an accessible guide designed to help readers understand how economies function without complex jargon or equations. Covering a wide range of systems\u2014including capitalism, socialism, and feudalism\u2014the book explains economic principles through real-world examples and historical insights. Readers will learn to analyze policies based on the incentives they create, while exploring topics such as rent control, business cycles, and international trade. This fifth edition adds a new chapter on global wealth and income differences, offering timely perspective on economic disparities. Clear, engaging, and comprehensive, it is an ideal introduction for anyone looking to grasp the fundamentals of economics."
+        },
+        "Product 4": {
+            "Product Name": "The Five Dysfunctions of a Team: A Leadership Fable, 20th Anniversary Edition",
+            "Product Price": "$15.89",
+            "Product Description": "A modern classic in leadership and organizational development, The Five Dysfunctions of a Team by Patrick Lencioni blends an engaging business fable with practical insights for executives, managers, and teams at every level. Following the story of Kathryn Petersen, a CEO facing a deeply divided executive team, the book illustrates the common obstacles that undermine collaboration and performance. Lencioni identifies five core dysfunctions that can derail even the most talented groups and provides a clear, actionable framework for overcoming them. Widely regarded as an essential guide to building trust, accountability, and cohesive teamwork, this anniversary edition includes a new foreword from the author reflecting on two decades of impact. Timeless and highly accessible, it remains one of the most trusted resources for leaders seeking to strengthen team dynamics and drive lasting organizational success."
+        },
+        "Product 5": {
+            "Product Name": "Spidey and His Amazing Friends: Team Spidey Does It All!: My First Comic Reader!",
+            "Product Price": "$5.99",
+            "Product Description": "Introduce young readers to the exciting world of comics with My First Comics: Spidey and His Amazing Friends. Designed especially for ages 4\u20136, this beginner-friendly comic features simple text, clear layouts, and easy-to-follow storylines that help kids learn the basics of reading graphic novels. Along the way, children will enjoy fun adventures with Spidey and his friends while exploring positive themes of teamwork, friendship, and problem-solving. Perfect for fans of the popular TV show, this book makes a great first step into comics and a wonderful addition to any Spidey collection."
+        }
+    },
+    "Grocery": {
+        "Product 1": {
+            "Product Name": "365 by Whole Foods Market, Organic Broccoli Florets, 10 oz",
+            "Product Price": "$3.99",
+            "Product Description": "Enjoy crisp, fresh vegetables with this convenient selection from Whole Foods Market, pre-washed and ready to eat straight from the bag. Perfect for healthy snacking, quick lunchbox additions, or creating effortless vegetable platters, it\u2019s a versatile choice for everyday meals. The microwave-steamable bag makes preparation simple, allowing you to enjoy warm, tender veggies in minutes without extra cleanup. Whether you prefer them fresh or lightly steamed, this ready-to-use option saves time while making it easy to add more vegetables to your routine."
+        },
+        "Product 2": {
+            "Product Name": "Amazon Fresh, Whole Milk, Gallon, 128 Fl Oz (Previously Happy Belly, Packaging May Vary)",
+            "Product Price": "$2.75",
+            "Product Description": "Enjoy the rich, creamy taste of Amazon Fresh Whole Milk, conveniently packaged in a generous 128 fl oz container. This versatile kitchen staple is a great source of nutrition and can be enjoyed on its own, with cereal, in coffee, or as an essential ingredient in your favorite recipes. Packaged under the trusted Amazon Fresh label, it delivers the same quality and freshness you count on, with packaging that may vary. Perfect for families or everyday use, this whole milk provides the wholesome goodness you expect at a value that fits your budget."
+        },
+        "Product 3": {
+            "Product Name": "Red Cherries, 1 lb",
+            "Product Price": "$2.99",
+            "Product Description": "These fresh, conventionally grown fruits are carefully selected in the United States to meet high quality standards and delivered to you at peak freshness. Perfectly versatile, they can be enjoyed on their own as a wholesome snack or added to your favorite recipes for extra flavor and nutrition. For the best experience, simply rinse before eating and store in the refrigerator to preserve their taste and freshness. Whether you enjoy them straight from the package or as part of a dish, these fruits are a simple, healthy choice for everyday enjoyment."
+        },
+        "Product 4": {
+            "Product Name": "Vital Farms Organic Pasture Raised Eggs Large Brown, 12 Count",
+            "Product Price": "$10.49",
+            "Product Description": "Enjoy farm-fresh quality with Vital Farms Organic Pasture-Raised Eggs, a carton of 12 large, brown Grade A eggs sourced from small family farms. These eggs come from hens raised outdoors with ample space to roam on open pastures, where they forage naturally and live in humane conditions. Rich in protein and versatility, they\u2019re a wholesome choice for everything from breakfast scrambles to baking. Every carton includes traceability information, letting you see exactly which farm your eggs came from. As a Certified B Corporation, Vital Farms is committed to supporting sustainable farming practices that benefit people, animals, and the planet."
+        },
+        "Product 5": {
+            "Product Name": "Dave's Killer Bread 21 Whole Grains & Seeds Thin-Sliced, Whole Grain Organic Bread, 20.5 oz Loaf",
+            "Product Price": "$5.99",
+            "Product Description": "Dave\u2019s Killer Bread 21 Whole Grains & Seeds Thin-Sliced offers a wholesome and flavorful option for everyday meals. Each 20.5 oz loaf is packed with nutritious benefits, delivering 3g of protein, 3g of fiber, 80mg of ALA Omega-3, and 12g of whole grains per slice. With its hearty texture, hint of sweetness, and seed-coated crust, this bread pairs well with sandwiches, toast, or your favorite spreads. Made with USDA organic ingredients and Non-GMO Project Verified, it contains no high-fructose corn syrup, artificial preservatives, or artificial ingredients. A nutritious choice with great taste, it\u2019s a simple and satisfying way to enjoy whole grains every day."
+        }
+    },
+    "Clothing": {
+        "Product 1": {
+            "Product Name": "Gildan Men's Crew T-Shirts, Multipack, Style G1100",
+            "Product Price": "$17.97",
+            "Product Description": "Crafted from soft, breathable cotton, this shirt offers all-day comfort with a lightweight feel that\u2019s perfect for everyday wear. Built-in moisture-wicking technology helps keep you cool and dry, making it a reliable choice for busy days or active lifestyles. The tag-free design prevents irritation, while the lay-flat collar and classic length ensure a polished look that stays in place when tucked. Finished with durable stitching, this wardrobe essential is designed to hold up to regular wear and maintain its shape wash after wash."
+        },
+        "Product 2": {
+            "Product Name": "NIMIN High Waisted Work Pants for Women Business Casual Outfits 2025 Office Dress Pants Trousers with Pockets",
+            "Product Price": "$36.99",
+            "Product Description": "These versatile business casual pants combine comfort and style with their soft, breathable, and durable fabric designed for all-day wear. Featuring a flattering high waist, belt loops, and front pleats, they offer a polished look that transitions seamlessly from the office to evenings out. The straight-leg design provides a comfortable fit for various body types, while practical side pockets are deep enough to hold essentials like your phone or wallet. With decorative back details that enhance the silhouette, these pants are easy to pair with tops ranging from blouses to tees for both professional and casual occasions. Available in Short, Regular, and Long inseam options, they provide a tailored fit for different heights and preferences."
+        },
+        "Product 3": {
+            "Product Name": "Hanes, Ecosmart Fleece Full-zip Hoodie for Men, Hooded Sweatshirt",
+            "Product Price": "$12.25",
+            "Product Description": "Stay comfortable and cozy in the Hanes EcoSmart Fleece Zip-Up Hoodie, crafted with cotton sourced from American farms for a feel-good choice you\u2019ll want to wear every day. Designed with a classic zip-front silhouette, it features an adjustable drawstring hood and handy front pockets for added convenience. The thick, durable fleece is made to stay soft over time, while double-needle stitching at key seams enhances long-lasting quality. Ribbed cuffs and hem provide a secure fit, and the unisex design offers a standard men\u2019s fit that also delivers a relaxed, oversized look for women. Available in a wide range of sizes, including Big & Tall, this versatile hoodie is a reliable layering piece for all-season comfort."
+        },
+        "Product 4": {
+            "Product Name": "Trendy Queen Cropped Cardigan Sweaters for Women Lightweight Crop Cotton Knit Y2k Fall Outfits Fashion Clothes 2025",
+            "Product Price": "$29.99",
+            "Product Description": "Stay comfortable and stylish with this women\u2019s open-front cardigan, crafted from a soft blend of polyester, acrylic, and polyamide for a cozy, skin-friendly feel. Designed with long sleeves and a relaxed fit, it\u2019s a versatile layering piece that pairs easily with casual outfits for school, daily wear, or outings. Its lightweight yet warm fabric makes it perfect for transitioning between seasons while keeping you comfortable throughout the day. Simple to care for with cold hand washing, this cardigan is a practical addition to any wardrobe\u2014just be sure to check the provided size chart for your best fit."
+        },
+        "Product 5": {
+            "Product Name": "adidas Women's VL Court 3.0 Sneaker",
+            "Product Price": "$59.99",
+            "Product Description": "Step into timeless style and everyday comfort with these suede sneakers, designed for a classic yet versatile look. The soft suede upper pairs with a smooth textile lining to deliver a comfortable fit that feels good from the first wear. A cushioned midsole provides lightweight support and absorbs impact with every step, making them ideal for all-day wear. Finished with vulcanized tooling, the outsole adds durability and a retro-inspired touch that complements any casual outfit. For the best fit, consider sizing down by half a size."
+        }
+    },
+    "Beauty": {
+        "Product 1": {
+            "Product Name": "Clinique Almost Lipstick Tinted Lip Balm in 2 Iconic Shades Black Honey and Pink Honey | Sheer + Lightweight",
+            "Product Price": "$21.25",
+            "Product Description": "Clinique Almost Lipstick in Black Honey is a cult-favorite lip color known for its universally flattering shade that adapts beautifully to every skin tone. Though it appears deep in the tube, it applies as a sheer, glossy wash that enhances the natural color of your lips. The lightweight, emollient-rich formula glides on smoothly, leaving lips feeling soft and comfortable. Perfect for everyday wear, it can be applied alone for a subtle tint or layered for a deeper, more customized look."
+        },
+        "Product 2": {
+            "Product Name": "e.l.f. Flawless Satin Foundation, Lightweight & Medium Coverage, Semi-Matte Finish, Vegan & Cruelty-Free, Pearl, 0.68 Fl Oz (20mL)",
+            "Product Price": "$7.00",
+            "Product Description": "e.l.f. Flawless Finish Foundation in Pearl is a lightweight, buildable liquid foundation that delivers medium-to-full coverage with a smooth, natural look. Designed to blend seamlessly into skin, it helps even out tone and texture while hydrating with glycerin for a soft, comfortable feel. The semi-matte satin finish provides long-lasting wear that works well for all skin types, giving you a polished look that lasts throughout the day. For customizable coverage, it can be mixed with moisturizer for a sheer finish or paired with glow lotion for added radiance. Like all e.l.f. products, this foundation is made with skin-loving ingredients and is 100% vegan and cruelty-free."
+        },
+        "Product 3": {
+            "Product Name": "CeraVe Foaming Facial Cleanser, Daily Face Wash for Oily Skin, Hyaluronic Acid + Ceramides + Niacinamide, Fragrance Free & Paraben Free, Non-Drying Oil Control Face Wash, 16 Fluid Ounces",
+            "Product Price": "$15.48",
+            "Product Description": "CeraVe Foaming Face Wash is a gentle gel-to-foam cleanser designed to effectively remove excess oil, dirt, and makeup without leaving skin feeling tight or dry. Formulated with three essential ceramides, it helps maintain the skin\u2019s natural protective barrier while delivering a refreshing cleanse. This non-comedogenic, fragrance-free, and paraben-free formula is suitable for normal to oily skin and can be used daily on the face, body, or even as a hand wash. Developed with dermatologists, it provides a non-irritating cleansing solution you can rely on for both morning and evening skincare routines."
+        },
+        "Product 4": {
+            "Product Name": "La Roche-Posay Toleriane Double Repair Face Moisturizer, Daily Moisturizer Face Cream with Ceramide & Niacinamide for All Skin Types, Immediate Comfort & Long Lasting Hydration, Fragrance Free",
+            "Product Price": "$24.99",
+            "Product Description": "This ultra-hydrating face moisturizer is designed to replenish and strengthen the skin barrier for healthier-looking skin. Formulated with Prebiotic Thermal Water, Ceramide-3, Niacinamide, and Glycerin, it delivers up to 48 hours of hydration while supporting skin\u2019s natural protective layer. The lightweight, oil-free texture absorbs quickly without clogging pores, making it suitable for daily use. Fragrance-free and gentle, it provides both immediate relief and long-lasting hydration. For best results, apply to the face and neck morning and evening as part of your skincare routine."
+        },
+        "Product 5": {
+            "Product Name": "The Ordinary Glycolic Acid 7% Exfoliating Toner, Brightening and Smoothing Daily Toner for More Even-Looking Skin Tone",
+            "Product Price": "$8.70",
+            "Product Description": "The Ordinary Glycolic Acid 7% Exfoliating Toner is a gentle yet effective formula designed to improve skin texture and promote a brighter, more even-looking complexion. Powered by glycolic acid, it works to exfoliate dead skin cells while Tasmanian Pepperberry helps reduce irritation and aloe vera provides soothing hydration. Ginseng extract is included to support a refreshed, radiant appearance with continued use. Ideal for incorporating into your evening skincare routine, this toner is applied with a cotton pad after cleansing to smooth and revitalize the skin over time."
+        }
+    }
+}

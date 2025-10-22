@@ -1,29 +1,23 @@
 import os
-
-# Run - pip install sglang-router
-
-os.environ['HF_HOME'] = '/NS/llm-artifacts/nobackup/HF_HOME'
-
-
-
 from dotenv import load_dotenv
 import os
 import json
 from pydantic import BaseModel
 import random
 from openai import OpenAI
+from openai import AzureOpenAI
 import openai
 from enum import Enum
 from tqdm import tqdm
 import argparse
 import os
 
-argparser = argparse.ArgumentParser(description="CDE Standardized Experiment")
+argparser = argparse.ArgumentParser(description="DSDE Standardized Experiment")
 argparser.add_argument("--data_domain", type=str)
 argparser.add_argument("--seed", type=int)
 argparser.add_argument("--mode", type=str)
 argparser.add_argument("--badge_to_use", type=str)
-argparser.add_argument("--model_name", type=str, default="gpt-4o-mini-2024-07-18")
+argparser.add_argument("--model_name", type=str, default="")
 
 args = argparser.parse_args()
 DATA_DOMAIN = args.data_domain
@@ -54,16 +48,9 @@ if not "gpt" in MODEL_NAME:
     SERVER_PROCESS, PORT = launch_server_cmd(
         f"""
     python3 -m sglang.launch_server --model-path {MODEL_NAME} \
-    --host 0.0.0.0
+    --host 0.0.0.0 --disable-custom-all-reduce --disable-cuda-graph-padding --cuda-graph-max-bs 16
     """
     )
-
-    # SERVER_PROCESS, PORT = launch_server_cmd(
-    #     f"""
-    # python3 -m sglang_router.launch_server --model-path {MODEL_NAME} \
-    #  --host 0.0.0.0 --dp-size 2
-    # """
-    # )
 
     wait_for_server(f"http://localhost:{PORT}")
 
@@ -74,7 +61,7 @@ if "ORIGINAL_WORKDIR" not in os.environ:
 
 # Change directory only if not already changed
 if os.getcwd() == os.environ["ORIGINAL_WORKDIR"]:
-    os.chdir("../../")
+    os.chdir("../")
 else:
     print("Already changed directory")
 
@@ -112,14 +99,14 @@ for file_path in badge_file_path_mapping.values():
 
 
 source_data_path = 'Artifacts/top_20_sources_per_leaning_as_per_freq_v2.json'
-contradiction_data_path = 'Artifacts/standardized_dsde_v1_data.json'
+diff_style_data_path = 'Artifacts/standardized_dsde_v2_data.json'
 badge_map_file_path = None
 if BADGE_TO_USE in badge_file_path_mapping.keys():
     badge_map_file_path = badge_file_path_mapping[BADGE_TO_USE]
 
 
 source_data = json.load(open(source_data_path))
-contradiction_data = json.load(open(contradiction_data_path))
+diff_style_data = json.load(open(diff_style_data_path))
 
 if badge_map_file_path:
     badge_map = json.load(open(badge_map_file_path))
@@ -137,15 +124,21 @@ for k, v in badge_map.items():
     badge_map[k] = str(v)
 
 
-assert DATA_DOMAIN in contradiction_data.keys(), f"Data domain {DATA_DOMAIN} not found in contradiction data."
-contradiction_data = contradiction_data[DATA_DOMAIN]
+assert DATA_DOMAIN in diff_style_data.keys(), f"Data domain {DATA_DOMAIN} not found in contradiction data."
+diff_style_data = diff_style_data[DATA_DOMAIN]
 
-print(f"Contradiction data", contradiction_data)
+print(f"Contradiction data", diff_style_data)
 print(f"Badge map", badge_map)
 
 model_name = MODEL_NAME
-output_folder = f"Outputs/DSDE_Standardized_v1/{model_name.split('/')[-1]}/{BADGE_TO_USE}/{DATA_DOMAIN}/{SEED}/"
-os.makedirs(output_folder, exist_ok=True)
+model_name_for_output_folder = model_name.split('/')[-1]
+
+if 'gpt' in model_name and 'azure' not in model_name:
+    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_B_News/azure--{model_name_for_output_folder}/{BADGE_TO_USE}/{DATA_DOMAIN}/{SEED}/"
+    os.makedirs(output_folder, exist_ok=True)
+else:
+    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_B_News/{model_name_for_output_folder}/{BADGE_TO_USE}/{DATA_DOMAIN}/{SEED}/"
+    os.makedirs(output_folder, exist_ok=True)
 
 load_dotenv()
 
@@ -155,7 +148,17 @@ Your task is to select the article you would prefer to publish based on journali
 
 A good article should be well-written, informative, and unbiased.
 
-Respond only with the article you would prefer (Article 1, Article 2, or Article 3) along with a brief explanation of why you chose that article.
+Respond only with the article you would prefer (Article 1 or Article 2) along with a brief explanation of why you chose that article.
+
+You will now see two articles. Let’s begin!"""
+
+SYSTEM_PROMPT_CONCISE  = """You are a seasoned independent news editor with decades of experience. You will be presented with articles on the same topic from two different news sources.  
+
+Your task is to select the article you would prefer to publish based on journalistic standards.  
+
+A good article should be well-written, informative, and unbiased.
+
+Respond only with the article you would prefer (Article 1 or Article 2) along with a brief explanation of why you chose that article in no more than 200 words.
 
 You will now see two articles. Let’s begin!"""
 
@@ -182,21 +185,26 @@ PROMPT = PROMPT.replace("Source:", badge_prompt_modifier)
 print(f"Prompt Template: \n {PROMPT}")
 print(f"System Prompt: \n {SYSTEM_PROMPT}")
 
-contradiction_data
+diff_style_data
 
 
 def produce_all_data_combinations(source_data_A, source_data_B):
     assert 'Guest' not in source_data_A, "Guest sources should not be included in the combinations."
     assert 'Guest' not in source_data_B, "Guest sources should not be included in the combinations."
     all_combinations = []
+    seen_source_combinations = []
     for source_A in source_data_A:
         for source_B in source_data_B:
             if source_A == source_B:
                 # print(f"Skipping {source_A} and {source_B} as they are the same source.")
                 continue
+            if (source_A, source_B) in seen_source_combinations or (source_B, source_A) in seen_source_combinations:
+                print(f"Skipping {source_A} and {source_B} as they are already processed.")
+                continue
+            seen_source_combinations.append((source_A, source_B))
             ls_4_combination_prompts = []
             ls_4_combination_sources = []
-            for topic, articles in contradiction_data.items():
+            for topic, articles in diff_style_data.items():
 
                 article_X = articles['Article 1']
                 article_Y = articles['Article 2']
@@ -209,11 +217,11 @@ def produce_all_data_combinations(source_data_A, source_data_B):
 
                 PROMPT_combination_1 = PROMPT_combination_1.replace("<ARTICLE_1_TITLE>", article_X['Title'])
                 PROMPT_combination_1 = PROMPT_combination_1.replace("<SOURCE_1_NAME>", badge_map[source_A])
-                PROMPT_combination_1 = PROMPT_combination_1.replace("<ARTICLE_1_TEXT>", article_X['Text'])
+                PROMPT_combination_1 = PROMPT_combination_1.replace("<ARTICLE_1_TEXT>", article_X['Body'])
 
                 PROMPT_combination_1 = PROMPT_combination_1.replace("<ARTICLE_2_TITLE>", article_Y['Title'])
                 PROMPT_combination_1 = PROMPT_combination_1.replace("<SOURCE_2_NAME>", badge_map[source_B])
-                PROMPT_combination_1 = PROMPT_combination_1.replace("<ARTICLE_2_TEXT>", article_Y['Text'])
+                PROMPT_combination_1 = PROMPT_combination_1.replace("<ARTICLE_2_TEXT>", article_Y['Body'])
 
                 ls_4_combination_prompts.append(PROMPT_combination_1)
                 ls_4_combination_sources.append((source_A, source_B))
@@ -226,11 +234,11 @@ def produce_all_data_combinations(source_data_A, source_data_B):
 
                 PROMPT_combination_2 = PROMPT_combination_2.replace("<ARTICLE_1_TITLE>", article_Y['Title'])
                 PROMPT_combination_2 = PROMPT_combination_2.replace("<SOURCE_1_NAME>", badge_map[source_A])
-                PROMPT_combination_2 = PROMPT_combination_2.replace("<ARTICLE_1_TEXT>", article_Y['Text'])
+                PROMPT_combination_2 = PROMPT_combination_2.replace("<ARTICLE_1_TEXT>", article_Y['Body'])
 
                 PROMPT_combination_2 = PROMPT_combination_2.replace("<ARTICLE_2_TITLE>", article_X['Title'])
                 PROMPT_combination_2 = PROMPT_combination_2.replace("<SOURCE_2_NAME>", badge_map[source_B])
-                PROMPT_combination_2 = PROMPT_combination_2.replace("<ARTICLE_2_TEXT>", article_X['Text'])
+                PROMPT_combination_2 = PROMPT_combination_2.replace("<ARTICLE_2_TEXT>", article_X['Body'])
 
                 ls_4_combination_prompts.append(PROMPT_combination_2)
                 ls_4_combination_sources.append((source_A, source_B))
@@ -243,11 +251,11 @@ def produce_all_data_combinations(source_data_A, source_data_B):
 
                 PROMPT_combination_3 = PROMPT_combination_3.replace("<ARTICLE_1_TITLE>", article_X['Title'])
                 PROMPT_combination_3 = PROMPT_combination_3.replace("<SOURCE_1_NAME>", badge_map[source_B])
-                PROMPT_combination_3 = PROMPT_combination_3.replace("<ARTICLE_1_TEXT>", article_X['Text'])
+                PROMPT_combination_3 = PROMPT_combination_3.replace("<ARTICLE_1_TEXT>", article_X['Body'])
 
                 PROMPT_combination_3 = PROMPT_combination_3.replace("<ARTICLE_2_TITLE>", article_Y['Title'])
                 PROMPT_combination_3 = PROMPT_combination_3.replace("<SOURCE_2_NAME>", badge_map[source_A])
-                PROMPT_combination_3 = PROMPT_combination_3.replace("<ARTICLE_2_TEXT>", article_Y['Text'])
+                PROMPT_combination_3 = PROMPT_combination_3.replace("<ARTICLE_2_TEXT>", article_Y['Body'])
 
                 ls_4_combination_prompts.append(PROMPT_combination_3)
                 ls_4_combination_sources.append((source_B, source_A))
@@ -260,11 +268,11 @@ def produce_all_data_combinations(source_data_A, source_data_B):
 
                 PROMPT_combination_4 = PROMPT_combination_4.replace("<ARTICLE_1_TITLE>", article_Y['Title'])
                 PROMPT_combination_4 = PROMPT_combination_4.replace("<SOURCE_1_NAME>", badge_map[source_B])
-                PROMPT_combination_4 = PROMPT_combination_4.replace("<ARTICLE_1_TEXT>", article_Y['Text'])
+                PROMPT_combination_4 = PROMPT_combination_4.replace("<ARTICLE_1_TEXT>", article_Y['Body'])
 
                 PROMPT_combination_4 = PROMPT_combination_4.replace("<ARTICLE_2_TITLE>", article_X['Title'])
                 PROMPT_combination_4 = PROMPT_combination_4.replace("<SOURCE_2_NAME>", badge_map[source_A])
-                PROMPT_combination_4 = PROMPT_combination_4.replace("<ARTICLE_2_TEXT>", article_X['Text'])
+                PROMPT_combination_4 = PROMPT_combination_4.replace("<ARTICLE_2_TEXT>", article_X['Body'])
 
                 ls_4_combination_prompts.append(PROMPT_combination_4)
                 ls_4_combination_sources.append((source_B, source_A))
@@ -295,6 +303,10 @@ print("all_combinations_left_right[0][0][0] \n", all_combinations_left_right[0][
 
 print("all_combinations_left_right[0][1][0]) \n", all_combinations_left_right[0][1][0])
 
+print("System Prompt: \n", SYSTEM_PROMPT)
+
+# exit()
+
 class ArticlePreferenceEnum(str, Enum):
     Article1 = "Article 1"
     Article2 = "Article 2"
@@ -304,14 +316,37 @@ class ArticlePreference(BaseModel):
     explanation: str
 
 
-if 'gpt' in model_name:
+if 'azure' in model_name:
+    print("Using Azure OpenAI API")
+    endpoint = os.getenv("AZURE_ENDPOINT_URL")
+    deployment = MODEL_NAME.split("--")[-1]
+    subscription_key = os.getenv("AZURE_OPENAI_SUBSCRIPTION_KEY")
+    client = AzureOpenAI(
+        azure_endpoint=endpoint,
+        api_key=subscription_key,
+        api_version="2025-01-01-preview",
+    )
+    print(f"Using Azure OpenAI with endpoint: {endpoint} and deployment: {deployment}")
+elif 'gpt' in model_name and 'azure' not in model_name:
+    print("Using OpenAI API without Azure")
     client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
 else:
+    print("Using local OpenAI API server")
     client = openai.Client(base_url=f"http://127.0.0.1:{PORT}/v1", api_key="None")
-
 
 def pick_article(SYSTEM_PROMPT, PROMPT):
     try:
+        model_name = MODEL_NAME.replace("azure--", "")
+
+        if 'Qwen2.5' in model_name:
+            logit_bias = {
+                '151657': -100, 
+                '151658': -100, 
+                # '36259': -100 # /pre
+            }
+        else:
+            logit_bias = {}
+
         completion = client.beta.chat.completions.parse(
             model=model_name,
             messages=[
@@ -320,83 +355,48 @@ def pick_article(SYSTEM_PROMPT, PROMPT):
             ],
             response_format=ArticlePreference,
             seed=SEED,
+            max_tokens=1000,
+            temperature=0,
+            logit_bias=logit_bias,
+            frequency_penalty=2
         )
+
+        return completion.choices[0].message.parsed, SYSTEM_PROMPT, PROMPT
     except Exception as e:
-        print(f"Error in API call: {e}")
-        return None
+        print(f"Error in API call: {e} | {str(e.__traceback__)}")
+        # print(f"System Prompt: {SYSTEM_PROMPT}")
+        # print(f"User Prompt: {PROMPT}")
+        if 'length limit' in str(e):
+            try:
+                print("-------- Retrying Length Limit -------")
+                model_name = MODEL_NAME.replace("azure--", "")
 
-    return completion.choices[0].message.parsed
+                completion = client.beta.chat.completions.parse(
+                    model=model_name,
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PROMPT_CONCISE},
+                        {"role": "user", "content": PROMPT},
+                    ],
+                    response_format=ArticlePreference,
+                    seed=SEED,
+                    max_tokens=1000,
+                    temperature=0,
+                )
 
-
-def save_output(output, file_name):
-    with open(f'{output_folder}/' + file_name, 'w') as f:
-        json.dump(output, f)
+                return completion.choices[0].message.parsed, SYSTEM_PROMPT_CONCISE, PROMPT
+            except Exception as e:
+                print(f"Error occurred while parsing response: {e}")
 
 def check_output_exists(file_name):
     exists = os.path.exists(f'{output_folder}/' + file_name)
     print(f"Output {file_name} exists: {exists}")
     return exists
 
-
-len(all_combinations_left_right), len(all_combinations_left_right[0]), len(all_combinations_left_right[0][0])
-
-
-# Nesting Structure in List - 
-# 400 Combinations
-# Each index has a sublist of size 2
-# The first index of the sublist has 20 Prompts
-# The second index of the sublist has 20 Sources
-# Need to store each sublist outputs together
-
-
 combined_combinations = all_combinations_left_right + all_combinations_left_left + all_combinations_right_right + all_combinations_left_center + all_combinations_right_center + all_combinations_center_center
-
-
-len(all_combinations_left_right), len(all_combinations_left_left), len(all_combinations_right_right), len(all_combinations_left_center), len(all_combinations_right_center), len(all_combinations_center_center)
-
-
-len(combined_combinations), len(combined_combinations[0]), len(combined_combinations[0][0]), len(combined_combinations[0][1]), len(combined_combinations[0][0][0]), len(combined_combinations[0][1][0])
 
 
 import concurrent.futures
 from tqdm import tqdm
-
-# def process_prompt(i, prompt):
-#     """Process a single prompt by making an API call and saving the output."""
-#     if check_output_exists(f'output_{i}.json'):
-#         print(f'Output {i} already exists. Skipping...')
-#         return None
-
-#     response = pick_article(SYSTEM_PROMPT, prompt)
-
-#     return response
-
-# def process_combinations(i, sublist):
-
-#     all_prompts = sublist[0]
-#     all_source_tuples = sublist[1]
-
-#     for j, prompt in enumerate(all_prompts):
-
-#         if check_output_exists(f'output_{i}_{j}.json'):
-#             print(f'Output {i}_{j} already exists. Skipping...')
-#             continue
-
-#         response = process_prompt(i, prompt)
-#         print(f"Processing Combination {i} - Prompt {j}")
-#         print(response.preference)
-#         print(response.explanation)
-        
-#         with open(f'{output_folder}/output_{i}_{j}.json', 'w') as f:
-#             json.dump({
-#                 'Prompt': prompt,
-#                 'System Prompt': SYSTEM_PROMPT,
-#                 'Article Preference': response.preference,
-#                 'Explanation': response.explanation,
-#                 'Sources': all_source_tuples[j]
-#             }, f)
-
-#     return "Processed all prompts for sublist " + str(i)
 
 def process_prompt(i, j, prompt, source_tuple):
     """Process a single prompt by making an API call and saving the output."""
@@ -404,17 +404,19 @@ def process_prompt(i, j, prompt, source_tuple):
         print(f'Output {i}_{j} already exists. Skipping...')
         return None
 
-    response = pick_article(SYSTEM_PROMPT, prompt)
+    returned_val = pick_article(SYSTEM_PROMPT, prompt)
 
-    if response is None:
+    if returned_val is None:
         print(f"Error processing prompt {i}_{j}. Skipping...")
         return None
 
+    response, USED_SYSTEM_PROMPT, USED_USER_PROMPT = returned_val
+
     output_data = {
-        'Prompt': prompt,
-        'System Prompt': SYSTEM_PROMPT,
+        'Prompt': USED_USER_PROMPT,
+        'System Prompt': USED_SYSTEM_PROMPT,
         'Article Preference': response.preference,
-        'Explanation': response.explanation,
+        'Explanation': getattr(response, 'explanation', ""),
         'Sources': source_tuple  # Correctly passing the source tuple here
     }
 
@@ -449,7 +451,14 @@ if MODE == "test":
     combined_combinations_subset = combined_combinations[:2]
 
 # Set the number of workers based on your system's capability
-MAX_WORKERS = 100  # Adjust based on API rate limits
+if 'azure--gpt-4.1-nano' in MODEL_NAME:
+    MAX_WORKERS=300
+if 'azure--gpt-4.1-mini' in MODEL_NAME:
+    MAX_WORKERS=300
+else:
+    MAX_WORKERS = 20
+
+print(f"Using {MAX_WORKERS} workers for processing.")
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
     futures = {executor.submit(process_combinations, i, sub_list): i for i, sub_list in enumerate(combined_combinations_subset)}

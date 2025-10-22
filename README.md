@@ -1,28 +1,8 @@
 # In Agents We Trust, but Who Do Agents Trust? Latent Source Preferences Steer LLM Generations
 
-This repository contains the code and data for the paper "In Agents We Trust, but Who Do Agents Trust? Latent Source Preferences Steer LLM Generations". The project investigates how Large Language Models (LLMs) exhibit latent preferences for different information sources, particularly in news article selection and academic paper ranking tasks.
+This repository contains the code and data for the paper "In Agents We Trust, but Who Do Agents Trust? Latent Source Preferences Steer LLM Generations". The project investigates how Large Language Models (LLMs) exhibit latent preferences for different information sources, particularly in news article selection, academic paper ranking and ecommerce product recommendation tasks.
 
-## 🎯 Overview
-
-This research explores whether LLMs have implicit biases toward certain information sources when making decisions. Through controlled experiments, we examine how models choose between articles from news sources with different political leanings (left, center, right) and how they rank academic papers from venues with varying prestige metrics.
-
-## 📂 Repository Structure
-
-```
-LLM-Latent-Source-Preferences/
-├── base_run.py                    # Main experiment for news article preference analysis
-├── rank_news.py                   # News ranking experiments with source badges
-├── rank_venues.py                 # Academic venue ranking experiments
-├── rank_venues_with_context.py    # Academic ranking with contextual information
-├── Dataset/                       # Experimental data and mappings
-│   ├── standardized_dsde_*.json          # Academic paper datasets
-│   ├── top_20_sources_per_leaning_*.json # News source classifications
-│   ├── top_10_conferences_*.json         # Academic venue rankings
-│   └── ...                              # Additional metadata files
-└── README.md
-```
-
-### Environment Setup
+## Environment Setup
 
 1. Clone the repository:
 ```bash
@@ -30,14 +10,23 @@ git clone <repository-url>
 cd LLM-Latent-Source-Preferences
 ```
 
-2. Create a `.env` file with your API keys:
+2. Create a `.env` file with your API keys (if you wish to test OpenAI models):
 ```bash
 OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-3. For non-GPT models, set up SGLang using Docker:
+If you wish to use the Azure OpenAI service you will need to add the following - 
 
 ```bash
+AZURE_ENDPOINT_URL=your_azure_endpoint_url_here
+AZURE_OPENAI_SUBSCRIPTION_KEY=your_azure_subscription_key_here
+```
+
+3. To run experiments using the OpenAI APIs you can just install the dependencies mentioned in `requirements.txt`. The experiments were run using Python 3.11.2
+
+For experiments involving local models we use SGLang the SGLang docker container -
+
+```
 docker run --gpus all -it \
     --shm-size 32g \
     -v REAL_PATH:PATH_INSIDE_CONTAINER \
@@ -47,58 +36,83 @@ docker run --gpus all -it \
     bash
 ```
 
-Replace `YOUR_HF_TOKEN` with your Hugging Face token for accessing gated models.
+At the time of running these experiments, latest pointed to `v0.5.0rc2-cu126`
 
-## 🚀 Usage
+---
 
-### News Article Preference Experiments
+## Indirect Experiments
 
-Run the base experiment to analyze LLM preferences for news articles:
+Folder: `Indirect_Experiments/`
 
-```bash
-# Test mode with GPT-4
-python base_run.py --model gpt-4o-mini-2024-07-18 --seed 42 --mode test
+### How to run?
 
-# Production mode with a Hugging Face model
-python base_run.py --model meta-llama/Llama-2-7b-chat-hf --seed 42 --mode prod
+Simply run the bash file corresponding to the dataset you wish to run for. You can choose between different LLMs by commenting out the existing one/adding new ones.
+
+Note: If you wish to use LLMs via Azure please add the API Keys etc as above and in the model list in `runner_X.sh` bash file prepend the model name with `azure--`. This will use the azure deployment instead of a local one for that model. The save folder name however will remove this `azure--` prefix and only use the rest of the model name as the folder name.
+
+---
+
+## Direct Experiments
+
+Folder: `Direct_Experiments/`
+
+### How to run?
+
+Same as direct experiments
+
+---
+
+## Case Study 1: AllSides News Choice
+
+Folder: `Case_Study_1_AllSides_News_Choice/`
+
+### How to run?
+
+Simply run the bash file. You can choose between different LLMs by commenting out the existing one/adding new ones as well as which experiments to run by commenting out the ones you do not wish to run in the experiment_types list.
+
+---
+
+## Case Study 2: Amazon Seller Choice
+
+Folder: `Case_Study_2_Amazon_Seller_Choice/`
+
+### How to run?
+
+Simply run the bash file. You can choose between different LLMs by commenting out the existing one/adding new ones as well as which experiments to run by commenting out the ones you do not wish to run in the experiment_types list.
+
+---
+
+## Data and Artifacts
+
+Folder: `Artifacts/`
+
+Contains all the datasets used by different experiments.
+
+---
+
+## Outputs
+
+Folder: `Outputs/`
+
+All the saves will be done in this folder.
+
+---
+
+## Repository structure
+
+```
+Artifacts/                      # Standardized data and metadata used by experiments
+Indirect_Experiments/           # Indirect preference probes (latent signals)
+Direct_Experiments/             # Direct preference elicitation (explicit prompts)
+Case_Study_1_AllSides_News_Choice/   # Case Study with AllSides Data
+Case_Study_2_Amazon_Seller_Choice/   # Case Study with Amazon Seller Data
+Outputs/                        # Results for Experiments are Saved Here
+README.md
 ```
 
-### News Source Ranking with Badges
+The code for an earlier version accepted to `ICML 2025 Workshop on Reliable and Responsible Foundation Models` is present under the `ICML-R2-FM` branch of the repository.
 
-Analyze how source metadata (badges) influences LLM preferences:
-
-```bash
-python rank_news.py --data_domain politics --seed 42 --mode test --badge_to_use Base --model_name gpt-4o-mini-2024-07-18
-```
-
-Available badge types:
-- `Base`: No additional information
-- `X_Handle`, `X_Followers`, `X_URL`: Twitter/X metadata
-- `Instagram_Handle`, `Instagram_Followers`, `Instagram_URL`: Instagram metadata
-- `URL`: Website information
-- `Year_of_Establishment`, `Years_Since_Establishment`: Temporal information
-
-### Academic Venue Ranking
-
-Evaluate LLM preferences for academic papers from different venues:
-
-```bash
-python rank_venues.py --seed 42 --mode test --badge_to_use Base --model_name gpt-4o-mini-2024-07-18
-```
-
-Available badge types for venues:
-- `Base`: No additional information
-- `H5-Index`: Google Scholar H5-Index rankings
-- `H5-Median`: Google Scholar H5-Median rankings
-
-### Academic Ranking with Context
-
-Run experiments with additional contextual information:
-
-```bash
-python rank_venues_with_context.py --data_domain computational_linguistics --seed 42 --mode test --badge_to_use Base --model_name gpt-4o-mini-2024-07-18
-```
-
+---
 
 ## 📝 Citation
 

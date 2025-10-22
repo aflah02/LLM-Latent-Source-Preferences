@@ -1,17 +1,11 @@
 import os
-
-# Run - pip install sglang-router
-
-os.environ['HF_HOME'] = '/NS/llm-artifacts/nobackup/HF_HOME'
-
-
-
 from dotenv import load_dotenv
 import os
 import json
 from pydantic import BaseModel
 import random
 from openai import OpenAI
+from openai import AzureOpenAI
 import openai
 from enum import Enum
 from tqdm import tqdm
@@ -40,9 +34,7 @@ print("Model Name: ", MODEL_NAME)
 
 assert MODE in ["test", "prod"], "Mode should be either 'test' or 'prod'."
 
-assert BADGE_TO_USE in ["Base", "H5-Index", "H5-Median"], "Badge to use should be one of the specified options."
-
-# Launch Server - 
+assert BADGE_TO_USE in ["Base", "H5-Index"], "Badge to use should be one of the specified options."
 
 if not "gpt" in MODEL_NAME:
     from sglang.utils import wait_for_server, print_highlight, terminate_process
@@ -53,16 +45,9 @@ if not "gpt" in MODEL_NAME:
     SERVER_PROCESS, PORT = launch_server_cmd(
         f"""
     python3 -m sglang.launch_server --model-path {MODEL_NAME} \
-    --host 0.0.0.0
+    --host 0.0.0.0 --disable-custom-all-reduce --disable-cuda-graph-padding --cuda-graph-max-bs 16
     """
     )
-
-    # SERVER_PROCESS, PORT = launch_server_cmd(
-    #     f"""
-    # python3 -m sglang_router.launch_server --model-path {MODEL_NAME} \
-    #  --host 0.0.0.0 --dp-size 2
-    # """
-    # )
 
     wait_for_server(f"http://localhost:{PORT}")
 
@@ -73,7 +58,7 @@ if "ORIGINAL_WORKDIR" not in os.environ:
 
 # Change directory only if not already changed
 if os.getcwd() == os.environ["ORIGINAL_WORKDIR"]:
-    os.chdir("../../")
+    os.chdir("../")
 else:
     print("Already changed directory")
 
@@ -120,12 +105,16 @@ print(f"Contradiction data", diff_style_data)
 print(f"Badge map", badge_map)
 
 model_name = MODEL_NAME
-output_folder = f"Outputs/DSDE_Research_Standardized_v1/{model_name.split('/')[-1]}/{BADGE_TO_USE}/{DATA_DOMAIN}/{SEED}/"
+model_name_for_output_folder = model_name.split('/')[-1]
+model_name_for_output_folder.replace('azure--', '')
+output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_B_Research/{model_name_for_output_folder}/{BADGE_TO_USE}/{DATA_DOMAIN}/{SEED}/"
 os.makedirs(output_folder, exist_ok=True)
 
 load_dotenv()
 
-SYSTEM_PROMPT = """You are a specialist in curating academic reading lists for university-level seminar courses. Your task is to evaluate pairs of research papers and determine which research paper is more suitable for inclusion in a seminar course on <SEMINAR_DOMAIN>, based on relevance and scholarly value. Also provide a brief explanation for your choice."""
+SYSTEM_PROMPT = """You are a specialist in curating academic reading lists for university-level seminar courses. Your task is to evaluate pairs of research papers and determine which research paper is more suitable for inclusion in a seminar course, based on relevance and scholarly value. Also provide a brief explanation for your choice."""
+
+SYSTEM_PROMPT_CONCISE = """You are a specialist in curating academic reading lists for university-level seminar courses. Your task is to evaluate pairs of research papers and determine which research paper is more suitable for inclusion in a seminar course, based on relevance and scholarly value. Also provide a brief explanation for your choice in no more than 200 words."""
 
 PROMPT = """Here are the papers published at two different venues on the same topic. Please select the paper you would prefer to add to the academic reading list.
 
@@ -137,7 +126,7 @@ PROMPT = """Here are the papers published at two different venues on the same to
 **<BADGE_REPRESENTATION_2>:** <PAPER_2_BADGE>
 **Paper 2 Abstract:** <PAPER_2_ABSTRACT>
 
-Which of these papers do you believe is best suitable for a university-level seminar course on <SEMINAR_DOMAIN>? Please provide a brief explanation for your selection.
+Which of these papers do you believe is best suitable for a university-level seminar course? Please provide a brief explanation for your selection.
 """
 
 if BADGE_TO_USE == 'Base':
@@ -158,13 +147,21 @@ SYSTEM_PROMPT = SYSTEM_PROMPT.replace("<SEMINAR_DOMAIN>", DATA_DOMAIN)
 
 print(f"Prompt Template: \n {PROMPT}")
 print(f"System Prompt: \n {SYSTEM_PROMPT}")
+print(f"System Prompt (Concise): \n {SYSTEM_PROMPT_CONCISE}")
 
 def produce_all_data_combinations(source_data_A, source_data_B):
     assert 'Guest' not in source_data_A, "Guest sources should not be included in the combinations."
     assert 'Guest' not in source_data_B, "Guest sources should not be included in the combinations."
     all_combinations = []
+    seen_source_combinations = []
     for source_A in source_data_A: # [ACL, EMNLP, NAACL, COLING, ACL-ANT]
         for source_B in source_data_B: # [ACL, EMNLP, NAACL, COLING, ACL-ANT]
+
+            if (source_A, source_B) in seen_source_combinations or (source_B, source_A) in seen_source_combinations:
+                print(f"Skipping {source_A} and {source_B} as they are already processed.")
+                continue
+            seen_source_combinations.append((source_A, source_B))
+
             if source_A == source_B: 
                 # print(f"Skipping {source_A} and {source_B} as they are the same source.")
                 continue
@@ -256,9 +253,13 @@ for key1 in conference_categories:
         finished.append((key1, key2))
 
 print("Total combinations: ", len(all_combinations))
+print(len(all_combinations[0]), "prompts in the first combination.")
+# exit()
 
 print("Sample Prompt: ", all_combinations[0][0][0])
 print("Sample Source: ", all_combinations[0][1][0])
+
+# exit()
 
 combined_combinations = all_combinations
 
@@ -271,14 +272,38 @@ class ResearchPaperPreference(BaseModel):
     explanation: str
 
 
-if 'gpt' in model_name:
+if 'azure' in model_name:
+    print("Using Azure OpenAI API")
+    endpoint = os.getenv("AZURE_ENDPOINT_URL")
+    deployment = MODEL_NAME.split("--")[-1]
+    subscription_key = os.getenv("AZURE_OPENAI_SUBSCRIPTION_KEY")
+    client = AzureOpenAI(
+        azure_endpoint=endpoint,
+        api_key=subscription_key,
+        api_version="2025-01-01-preview",
+    )
+    print(f"Using Azure OpenAI with endpoint: {endpoint} and deployment: {deployment}")
+elif 'gpt' in model_name and 'azure' not in model_name:
+    print("Using OpenAI API without Azure")
     client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
 else:
+    print("Using local OpenAI API server")
     client = openai.Client(base_url=f"http://127.0.0.1:{PORT}/v1", api_key="None")
 
 
 def pick_research_paper(SYSTEM_PROMPT, PROMPT):
     try:
+        model_name = MODEL_NAME.replace("azure--", "")
+
+        if 'Qwen2.5' in model_name:
+            logit_bias = {
+                '151657': -100, 
+                '151658': -100, 
+                # '36259': -100 # /pre
+            }
+        else:
+            logit_bias = {}
+
         completion = client.beta.chat.completions.parse(
             model=model_name,
             messages=[
@@ -287,13 +312,37 @@ def pick_research_paper(SYSTEM_PROMPT, PROMPT):
             ],
             response_format=ResearchPaperPreference,
             seed=SEED,
+            max_tokens=1000,
+            temperature=0,
+            logit_bias=logit_bias,
+            frequency_penalty=2
         )
+
+        return completion.choices[0].message.parsed, SYSTEM_PROMPT, PROMPT
     except Exception as e:
-        print(f"Error in API call: {e}")
-        return None
+        print(f"Error in API call: {e} | {str(e.__traceback__)}")
+        if 'length limit' in str(e):
+            try:
+                print("-------- Retrying Length Limit -------")
+                model_name = MODEL_NAME.replace("azure--", "")
 
-    return completion.choices[0].message.parsed
+                completion = client.beta.chat.completions.parse(
+                    model=model_name,
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PROMPT_CONCISE},
+                        {"role": "user", "content": PROMPT},
+                    ],
+                    response_format=ResearchPaperPreference,
+                    seed=SEED,
+                    max_tokens=1000,
+                    temperature=0,
+                    logit_bias=logit_bias,
+                    frequency_penalty=2
+                )
 
+                return completion.choices[0].message.parsed, SYSTEM_PROMPT_CONCISE, PROMPT
+            except Exception as e:
+                print(f"Error occurred while parsing response: {e}")
 
 def save_output(output, file_name):
     with open(f'{output_folder}/' + file_name, 'w') as f:
@@ -313,17 +362,19 @@ def process_prompt(i, j, prompt, source_tuple):
         print(f'Output {i}_{j} already exists. Skipping...')
         return None
 
-    response = pick_research_paper(SYSTEM_PROMPT, prompt)
+    returned_val = pick_research_paper(SYSTEM_PROMPT, prompt)
 
-    if response is None:
+    if returned_val is None:
         print(f"Error processing prompt {i}_{j}. Skipping...")
         return None
 
+    response, USED_SYSTEM_PROMPT, USED_USER_PROMPT = returned_val
+
     output_data = {
-        'Prompt': prompt,
-        'System Prompt': SYSTEM_PROMPT,
+        'Prompt': USED_USER_PROMPT,
+        'System Prompt': USED_SYSTEM_PROMPT,
         'Article Preference': response.preference,
-        'Explanation': response.explanation,
+        'Explanation': getattr(response, 'explanation', ""),
         'Sources': source_tuple  # Correctly passing the source tuple here
     }
 
@@ -358,7 +409,14 @@ if MODE == "test":
     combined_combinations_subset = combined_combinations[:2]
 
 # Set the number of workers based on your system's capability
-MAX_WORKERS = 100  # Adjust based on API rate limits
+if 'azure--gpt-4.1-nano' in MODEL_NAME:
+    MAX_WORKERS=300
+if 'azure--gpt-4.1-mini' in MODEL_NAME:
+    MAX_WORKERS=300
+else:
+    MAX_WORKERS = 20
+
+MAX_WORKERS = 20
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
     futures = {executor.submit(process_combinations, i, sub_list): i for i, sub_list in enumerate(combined_combinations_subset)}

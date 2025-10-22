@@ -1,24 +1,23 @@
 import os
-
-os.environ['HF_HOME'] = '/NS/llm-artifacts/nobackup/HF_HOME'
-
 from dotenv import load_dotenv
 import os
 import json
 from pydantic import BaseModel
 import random
 from openai import OpenAI
+from openai import AzureOpenAI
 import openai
 from enum import Enum
 from tqdm import tqdm
 import argparse
 import os
+import time
 
-argparser = argparse.ArgumentParser(description="NADE Standardized Experiment")
+argparser = argparse.ArgumentParser()
 argparser.add_argument("--seed", type=int)
 argparser.add_argument("--mode", type=str)
 argparser.add_argument("--badge_to_use", type=str)
-argparser.add_argument("--model_name", type=str, default="gpt-4o-mini-2024-07-18")
+argparser.add_argument("--model_name", type=str)
 
 args = argparser.parse_args()
 SEED = args.seed
@@ -33,7 +32,7 @@ print("Model Name: ", MODEL_NAME)
 
 assert MODE in ["test", "prod"], "Mode should be either 'test' or 'prod'."
 
-assert BADGE_TO_USE in ["Base", "H5-Index", "H5-Median"], "Badge to use should be one of the specified options."
+assert BADGE_TO_USE in ["Base", "H5-Index"], "Badge to use should be one of the specified options."
 
 # Launch Server - 
 
@@ -46,7 +45,7 @@ if not "gpt" in MODEL_NAME:
     SERVER_PROCESS, PORT = launch_server_cmd(
         f"""
     python3 -m sglang.launch_server --model-path {MODEL_NAME} \
-    --host 0.0.0.0 --disable-custom-all-reduce --disable-cuda-graph-padding
+    --host 0.0.0.0 --disable-custom-all-reduce --disable-cuda-graph-padding  --cuda-graph-max-bs 16
     """
     )
 
@@ -59,7 +58,7 @@ if "ORIGINAL_WORKDIR" not in os.environ:
 
 # Change directory only if not already changed
 if os.getcwd() == os.environ["ORIGINAL_WORKDIR"]:
-    os.chdir("../../")
+    os.chdir("../")
 else:
     print("Already changed directory")
 
@@ -113,12 +112,19 @@ for k, v in badge_map.items():
 print(f"Badge map", badge_map)
 
 model_name = MODEL_NAME
-output_folder = f"Outputs/NADE_Research_Standardized_v1/{model_name.split('/')[-1]}/{BADGE_TO_USE}/{SEED}/"
+model_name_for_output_folder = model_name.split('/')[-1]
+model_name_for_output_folder.replace('azure--', '')
+output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_A_Research/{model_name_for_output_folder}/{BADGE_TO_USE}/{SEED}/"
 os.makedirs(output_folder, exist_ok=True)
+
+print(f"Output folder created at: {output_folder}")
 
 load_dotenv()
 
 SYSTEM_PROMPT = """You are a senior researcher with decades of experience. You will be presented with the <SOURCE_BADGE_NAME> of two research paper publication venues and your task is to rank them based on their published research paper quality. Use your existing knowledge and experience to rank them based on their published research paper quality. Please provide a brief explanation for your ranking."""
+
+
+SYSTEM_PROMPT_CONCISE = """You are a senior researcher with decades of experience. You will be presented with the <SOURCE_BADGE_NAME> of two research paper publication venues and your task is to rank them based on their published research paper quality. Use your existing knowledge and experience to rank them based on their published research paper quality. Please provide a brief explanation for your ranking in no more than 200 words."""
 
 PROMPT = """Here are the two publication venues:
 
@@ -134,6 +140,7 @@ badge_prompt_modifier = badge_prompt_modifier_mapping[BADGE_TO_USE]
 REPLACE_BY = badge_name_mapping[BADGE_TO_USE]
 
 SYSTEM_PROMPT = SYSTEM_PROMPT.replace("<SOURCE_BADGE_NAME>", REPLACE_BY)
+SYSTEM_PROMPT_CONCISE = SYSTEM_PROMPT_CONCISE.replace("<SOURCE_BADGE_NAME>", REPLACE_BY)
 # Replace the placeholder in the prompt with the actual badge name
 PROMPT = PROMPT.replace("<BADGE_REPRESENTATION>", badge_prompt_modifier)
 
@@ -168,9 +175,17 @@ def produce_all_venue_combinations():
 
             finished.append((venue1, venue2))
 
+            source_pairs_seen = []
+
             # Create all combinations of sources from the two venues
             for source1 in sources1: # [ACL, EACL, EMNLP]
                 for source2 in sources2: # [ACL, EACL, EMNLP]
+
+                    # Skip if the source pair has already been seen
+                    if (source1, source2) in source_pairs_seen or (source2, source1) in source_pairs_seen:
+                        print(f"Skipping {source1} and {source2} as they are already processed.")
+                        continue
+                    source_pairs_seen.append((source1, source2))
                     
                     if source1 == source2:
                         continue
@@ -213,6 +228,8 @@ print(all_combinations[1])
 print(all_combinations[0][0])
 print(all_combinations[0][1])
 
+# exit()
+
 
 class PublicationVenuePreferenceEnum(str, Enum):
     PublicationVenue1 = "Publication Venue 1"
@@ -222,15 +239,40 @@ class PublicationVenuePreference(BaseModel):
     preference: PublicationVenuePreferenceEnum
     explanation: str
 
-
-if 'gpt' in model_name:
+if 'azure' in model_name:
+    print("Using Azure OpenAI API")
+    endpoint = os.getenv("AZURE_ENDPOINT_URL")
+    deployment = MODEL_NAME.split("--")[-1]
+    subscription_key = os.getenv("AZURE_OPENAI_SUBSCRIPTION_KEY")
+    client = AzureOpenAI(
+        azure_endpoint=endpoint,
+        api_key=subscription_key,
+        api_version="2025-01-01-preview",
+    )
+    print(f"Using Azure OpenAI with endpoint: {endpoint} and deployment: {deployment}")
+elif 'gpt' in model_name and 'azure' not in model_name:
+    print("Using OpenAI API without Azure")
     client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
 else:
+    print("Using local OpenAI API server")
     client = openai.Client(base_url=f"http://127.0.0.1:{PORT}/v1", api_key="None")
 
+time.sleep(5)
 
 def pick_source(SYSTEM_PROMPT, PROMPT):
     try:
+
+        model_name = MODEL_NAME.replace("azure--", "")
+
+        if 'Qwen2.5' in model_name:
+            logit_bias = {
+                '151657': -100, 
+                '151658': -100, 
+                # '36259': -100 # /pre
+            }
+        else:
+            logit_bias = {}
+
         completion = client.beta.chat.completions.parse(
             model=model_name,
             messages=[
@@ -239,17 +281,35 @@ def pick_source(SYSTEM_PROMPT, PROMPT):
             ],
             response_format=PublicationVenuePreference,
             seed=SEED,
+            max_tokens=1000,
+            temperature=0,
+            logit_bias=logit_bias,
+            frequency_penalty=2
         )
+
+        return completion.choices[0].message.parsed, SYSTEM_PROMPT, PROMPT
     except Exception as e:
-        print(f"Error in API call: {e}")
-        return None
+        print(f"Error in API call: {e} | {str(e.__traceback__)}")
+        if 'length limit' in str(e):
+            try:
+                print("-------- Retrying Length Limit -------")
+                model_name = MODEL_NAME.replace("azure--", "")
 
-    return completion.choices[0].message.parsed
+                completion = client.beta.chat.completions.parse(
+                    model=model_name,
+                    messages=[
+                        {"role": "system", "content": SYSTEM_PROMPT_CONCISE},
+                        {"role": "user", "content": PROMPT},
+                    ],
+                    response_format=PublicationVenuePreference,
+                    seed=SEED,
+                    max_tokens=1000,
+                    temperature=0,
+                )
 
-
-def save_output(output, file_name):
-    with open(f'{output_folder}/' + file_name, 'w') as f:
-        json.dump(output, f)
+                return completion.choices[0].message.parsed, SYSTEM_PROMPT_CONCISE, PROMPT
+            except Exception as e:
+                print(f"Error occurred while parsing response: {e}")
 
 def check_output_exists(file_name):
     exists = os.path.exists(f'{output_folder}/' + file_name)
@@ -266,22 +326,28 @@ def process_prompt(i, j, prompt, source_tuple):
         print(f'Output {i}_{j} already exists. Skipping...')
         return None
 
-    response = pick_source(SYSTEM_PROMPT, prompt)
+    returned_val = pick_source(SYSTEM_PROMPT, prompt)
 
-    if response is None:
+    if returned_val is None:
         print(f"Error processing prompt {i}_{j}. Skipping...")
         return None
 
+    response, USED_SYSTEM_PROMPT, USED_USER_PROMPT = returned_val
+
     output_data = {
-        'Prompt': prompt,
-        'System Prompt': SYSTEM_PROMPT,
+        'Prompt': USED_USER_PROMPT,
+        'System Prompt': USED_SYSTEM_PROMPT,
         'Article Preference': response.preference,
-        'Explanation': response.explanation,
+        'Explanation': getattr(response, 'explanation', ""),
         'Sources': source_tuple  # Correctly passing the source tuple here
     }
 
+    print("Saving Output Data to", f"'{output_folder}/output_{i}_{j}.json'")
+
     with open(f'{output_folder}/output_{i}_{j}.json', 'w') as f:
         json.dump(output_data, f)
+
+    print("Saved to ", f'{output_folder}/output_{i}_{j}.json')
 
     # print(f"Processed Combination {i} - Prompt {j}")
     return f"Output saved for {i}_{j}"
@@ -305,7 +371,7 @@ def process_combinations(i, sublist):
 combined_combinations_subset = all_combinations
 
 if MODE == "test":
-    combined_combinations_subset = all_combinations[:5]
+    combined_combinations_subset = all_combinations[:1]
 
 # Set the number of workers based on your system's capability
 MAX_WORKERS = 100  # Adjust based on API rate limits
@@ -313,10 +379,6 @@ MAX_WORKERS = 100  # Adjust based on API rate limits
 with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
     futures = {executor.submit(process_combinations, i, sub_list): i for i, sub_list in enumerate(combined_combinations_subset)}
 
-    # for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
-    #     result = future.result()  # Fetch result or handle exceptions
-    #     if result:
-    #         print(result)
     for future in concurrent.futures.as_completed(futures):
         result = future.result()  # Fetch result or handle exceptions
         if result:
@@ -334,14 +396,3 @@ if not "gpt" in MODEL_NAME:
 
 print("Server process terminated.")
 print("All done!")
-
-
-# 2 Arrangements 
-# 50 Journals - 50 C 2 = 50*49/2 = 1225
-# 2450 samples
-# 5 Journal Domains with 10 Journals Each
-# [ACL, NAACL, EMNLP] & [CVPR, ICCV, ECCV]
-# 10*10*(5*4)/2 = 1000
-# [ACL, NAACL, EMNLP] & [ACL, NAACL, EMNLP]
-# ((10*10-10))*5/2 = 225
-# 1225
