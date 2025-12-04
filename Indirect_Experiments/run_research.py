@@ -1,4 +1,3 @@
-import os
 from dotenv import load_dotenv
 import os
 import json
@@ -65,8 +64,8 @@ else:
 print(os.getcwd())  # Confirm the change
 
 badge_file_path_mapping = {
-    "H5-Index": "Artifacts/top_10_conferences_per_subcategory_to_h5_index_mapping.json",
-    "H5-Median": "Artifacts/top_10_conferences_per_subcategory_to_h5_median_mapping.json",
+    "H5-Index": "Artifacts/Research/top_10_conferences_per_subcategory_to_h5_index_mapping.json",
+    "H5-Median": "Artifacts/Research/top_10_conferences_per_subcategory_to_h5_median_mapping.json",
 }
 
 # Assert all the files exist
@@ -74,8 +73,8 @@ for file_path in badge_file_path_mapping.values():
     assert os.path.exists(file_path), f"File {file_path} does not exist."
 
 
-source_data_path = 'Artifacts/top_10_conferences_per_subcategory.json'
-diff_style_data_path = 'Artifacts/standardized_dsde_research_papers_v1_data.json'
+source_data_path = 'Artifacts/Research/top_10_conferences_per_subcategory.json'
+diff_style_data_path = 'Artifacts/Research/paper_data.json'
 badge_map_file_path = None
 if BADGE_TO_USE in badge_file_path_mapping.keys():
     badge_map_file_path = badge_file_path_mapping[BADGE_TO_USE]

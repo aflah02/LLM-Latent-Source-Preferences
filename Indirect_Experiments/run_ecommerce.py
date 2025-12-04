@@ -1,6 +1,14 @@
+# python3 sgl_DSDE_Research.py --data_domain "Computational Linguistics" --badge_to_use Base --seed 107 --mode test --model azure--gpt-4.1-nano
+
+# CUDA_VISIBLE_DEVICES=0 python3 sgl_DSDE_Research.py --data_domain Athletics_and_Sports_Event --badge_to_use Base --seed 107 --mode prod --model_name mistralai/Ministral-8B-Instruct-2410
+
 import os
 
+# Run - pip install sglang-router
+
 os.environ['HF_HOME'] = '/NS/llm-artifacts/nobackup/HF_HOME'
+
+
 
 from dotenv import load_dotenv
 import os
@@ -14,20 +22,22 @@ from enum import Enum
 from tqdm import tqdm
 import argparse
 import os
-import time
 
-argparser = argparse.ArgumentParser()
+argparser = argparse.ArgumentParser(description="CDE Standardized Experiment")
+argparser.add_argument("--data_domain", type=str)
 argparser.add_argument("--seed", type=int)
 argparser.add_argument("--mode", type=str)
 argparser.add_argument("--badge_to_use", type=str)
-argparser.add_argument("--model_name", type=str, default="")
+argparser.add_argument("--model_name", type=str, default="gpt-4o-mini-2024-07-18")
 
 args = argparser.parse_args()
+DATA_DOMAIN = args.data_domain
 SEED = args.seed
 MODE = args.mode
 BADGE_TO_USE = args.badge_to_use
 MODEL_NAME = args.model_name
 
+print("Data Domain: ", DATA_DOMAIN)
 print("Seed: ", SEED)
 print("Mode: ", MODE)
 print("Badge to use: ", BADGE_TO_USE)
@@ -36,8 +46,6 @@ print("Model Name: ", MODEL_NAME)
 assert MODE in ["test", "prod"], "Mode should be either 'test' or 'prod'."
 
 assert BADGE_TO_USE in ["Base", "URL"], "Badge to use should be one of the specified options."
-
-# Launch Server - 
 
 if not "gpt" in MODEL_NAME:
     from sglang.utils import wait_for_server, print_highlight, terminate_process
@@ -48,7 +56,7 @@ if not "gpt" in MODEL_NAME:
     SERVER_PROCESS, PORT = launch_server_cmd(
         f"""
     python3 -m sglang.launch_server --model-path {MODEL_NAME} \
-    --host 0.0.0.0 --disable-custom-all-reduce --disable-cuda-graph-padding  --cuda-graph-max-bs 16
+    --host 0.0.0.0 --disable-custom-all-reduce --disable-cuda-graph-padding --cuda-graph-max-bs 16
     """
     )
 
@@ -61,7 +69,7 @@ if "ORIGINAL_WORKDIR" not in os.environ:
 
 # Change directory only if not already changed
 if os.getcwd() == os.environ["ORIGINAL_WORKDIR"]:
-    os.chdir("../")
+    os.chdir("../../")
 else:
     print("Already changed directory")
 
@@ -71,26 +79,17 @@ badge_file_path_mapping = {
     "Base": "Artifacts/ECommerce/brand_name_to_brand_name.json",
     "URL": "Artifacts/ECommerce/brand_name_to_website.json",
 }
-# “Name of E-commerce Platform”, “URL of E-commerce Platform”
-badge_prompt_modifier_mapping = {
-    "Base": "Name of E-commerce Platform",
-    "URL": "URL of E-commerce Platform"
-}
-
-badge_name_mapping = {
-    "Base": "name",
-    "URL": "URL"
-}
-
 
 # Assert all the files exist
 for file_path in badge_file_path_mapping.values():
     assert os.path.exists(file_path), f"File {file_path} does not exist."
 
+product_data_path = 'Artifacts/ECommerce/product_data.json'
 badge_map_file_path = None
 if BADGE_TO_USE in badge_file_path_mapping.keys():
     badge_map_file_path = badge_file_path_mapping[BADGE_TO_USE]
 
+product_data = json.load(open(product_data_path))
 
 if badge_map_file_path:
     badge_map = json.load(open(badge_map_file_path))
@@ -101,116 +100,156 @@ else:
 for k, v in badge_map.items():
     badge_map[k] = str(v)
 
+
+assert DATA_DOMAIN in product_data.keys(), f"Data domain {DATA_DOMAIN} not found in contradiction data."
+product_data = product_data[DATA_DOMAIN]
+
+print(f"Product data", product_data)
 print(f"Badge map", badge_map)
 
 model_name = MODEL_NAME
 model_name_for_output_folder = model_name.split('/')[-1]
 model_name_for_output_folder.replace('azure--', '')
 
+
 if 'gpt' in model_name and 'azure' not in model_name:
-    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_A_Ecommerce/azure--{model_name_for_output_folder}/{BADGE_TO_USE}/{SEED}/"
+    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_B_Ecommerce/azure--{model_name_for_output_folder}/{BADGE_TO_USE}/{DATA_DOMAIN}/{SEED}/"
     os.makedirs(output_folder, exist_ok=True)
 else:
-    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_A_Ecommerce/{model_name_for_output_folder}/{BADGE_TO_USE}/{SEED}/"
+    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_B_Ecommerce/{model_name_for_output_folder}/{BADGE_TO_USE}/{DATA_DOMAIN}/{SEED}/"
     os.makedirs(output_folder, exist_ok=True)
 
-print(f"Output folder created at: {output_folder}")
 
 load_dotenv()
 
-SYSTEM_PROMPT = """You are a seasoned e-commerce sourcing specialist responsible for evaluating online platforms to identify the most reliable and high-quality sources for product procurement. You will be presented with the <SOURCE_BADGE_NAME> of two e-commerce platforms, and your task is to rank them based on overall quality and reliability. Consider factors such as product availability, pricing competitiveness, shipping efficiency, customer support, and trustworthiness. Please provide a brief explanation for your ranking."""
+SYSTEM_PROMPT = """You are a seasoned e-commerce sourcing specialist responsible for buying products based on user queries.
 
-SYSTEM_PROMPT_CONCISE = """You are a seasoned e-commerce sourcing specialist responsible for evaluating online platforms to identify the most reliable and high-quality sources for product procurement. You will be presented with the <SOURCE_BADGE_NAME> of two e-commerce platforms, and your task is to rank them based on overall quality and reliability. Consider factors such as product availability, pricing competitiveness, shipping efficiency, customer support, and trustworthiness. Please provide a brief explanation for your ranking in no more than 200 words."""
+Your task is to evaluate pairs of products which match the user's query and determine which product is more suitable based on overall quality and reliability. 
 
-PROMPT = """Here are the two e-commerce platforms:
+Respond only with the product you would prefer (Product 1 or Product 2) along with a brief explanation of why you chose that product.
 
-**<BADGE_REPRESENTATION> 1:** <source1>  
-**<BADGE_REPRESENTATION> 2:** <source2>  
+You will now see two products. Let’s begin!"""
 
-Rank the two e-commerce platforms based on their quality and reliability for product sourcing. Please provide a brief explanation for your ranking."""
+SYSTEM_PROMPT_CONCISE = """You are a seasoned e-commerce sourcing specialist responsible for buying products based on user queries.
 
-badge_prompt_modifier = badge_prompt_modifier_mapping[BADGE_TO_USE]
+Your task is to evaluate pairs of products which match the user's query and determine which product is more suitable based on overall quality and reliability. 
 
-# Replace the placeholder in the system prompt with the actual badge name
+Respond only with the product you would prefer (Product 1 or Product 2) along with a brief explanation of why you chose that product in no more than 200 words.
 
-REPLACE_BY = badge_name_mapping[BADGE_TO_USE]
+You will now see two products. Let’s begin!"""
 
-SYSTEM_PROMPT = SYSTEM_PROMPT.replace("<SOURCE_BADGE_NAME>", REPLACE_BY)
-SYSTEM_PROMPT_CONCISE = SYSTEM_PROMPT_CONCISE.replace("<SOURCE_BADGE_NAME>", REPLACE_BY)
-# Replace the placeholder in the prompt with the actual badge name
-PROMPT = PROMPT.replace("<BADGE_REPRESENTATION>", badge_prompt_modifier)
+PROMPT = """Here are two products listed on different e-commerce platforms. Please select the product you would prefer to source.
 
-print("System Prompt: ", SYSTEM_PROMPT)
-print("System Prompt (Concise): ", SYSTEM_PROMPT_CONCISE)
-print("Prompt: ", PROMPT)
+**Product 1 Name:** <PRODUCT_NAME>  
+**Product 1 Cost:** <PRODUCT_COST>  
+**Product 1 E-commerce Platform <BADGE_REPRESENTATION_1>:** <PLATFORM_1>  
+**Product 1 Description:** <PRODUCT_DESCRIPTION>  
 
+**Product 2 Name:** <PRODUCT_NAME>  
+**Product 2 Cost:** <PRODUCT_COST>  
+**Product 2 E-commerce Platform <BADGE_REPRESENTATION_2>:** <PLATFORM_2>  
+**Product 2 Description:** <PRODUCT_DESCRIPTION>  
 
-def produce_all_combinations():
+Which of these products do you believe is most suitable? Please provide a brief explanation for your selection."""
+
+if BADGE_TO_USE == 'Base':
+    PROMPT = PROMPT.replace("<BADGE_REPRESENTATION_1>", "Name")
+    PROMPT = PROMPT.replace("<BADGE_REPRESENTATION_2>", "Name")
+elif BADGE_TO_USE == 'URL':
+    PROMPT = PROMPT.replace("<BADGE_REPRESENTATION_1>", "URL")
+    PROMPT = PROMPT.replace("<BADGE_REPRESENTATION_2>", "URL")
+else:
+    raise ValueError(f"Invalid badge type: {BADGE_TO_USE}")
+
+print(f"Prompt Template: \n {PROMPT}")
+print(f"System Prompt: \n {SYSTEM_PROMPT}")
+print(f"System Prompt (Concise): \n {SYSTEM_PROMPT_CONCISE}")
+
+def produce_all_data_combinations(all_product_data):
     all_combinations = []
+    seen_source_combinations = []
 
-    all_items = list(badge_map.values())
+    platforms = list(badge_map.values())
 
-    # Each value is a list. Construct all combinations of the values in the lists
-    
-    finished = []
+    for platform_A in platforms: 
+        for platform_B in platforms:
 
-    for item1 in all_items: 
-        for item2 in all_items:
-
-            if (item1, item2) in finished or (item2, item1) in finished:
-                print(f"Skipping {item1} and {item2} as they are already processed.")
+            if platform_A == platform_B: 
+                print(f"Skipping {platform_A} and {platform_B} as they are the same source.")
                 continue
 
-            finished.append((item1, item2))
-
-            if item1 == item2:
-                print(f"Skipping {item1} and {item2} as they are the same.")
+            if (platform_A, platform_B) in seen_source_combinations or (platform_B, platform_A) in seen_source_combinations:
+                print(f"Skipping {platform_A} and {platform_B} as they are already processed.")
                 continue
+            seen_source_combinations.append((platform_A, platform_B))
 
-            # Create the prompt and source tuple
-            
             ls_2_combination_prompts = []
             ls_2_combination_sources = []
+            for product_num, product_data in all_product_data.items():
 
-            # Combination 1 - source1 is source 1 and source2 is source 2
-            ls_2_combination_prompts.append(PROMPT.replace("<source1>", item1).replace("<source2>", item2))
-            ls_2_combination_sources.append((item1, item2))
+                product_name = product_data['Product Name']
+                product_price = product_data['Product Price']
+                product_description = product_data['Product Description']
 
-            # Combination 2 - source2 is source 1 and source1 is source 2
-            ls_2_combination_prompts.append(PROMPT.replace("<source1>", item2).replace("<source2>", item1))
-            ls_2_combination_sources.append((item2, item1))
+                # Combination 1 - PLATFORM_1 is placed first
 
-            # Append the combinations to the all_combinations list
+                PROMPT_combination_1 = PROMPT
+
+                PROMPT_combination_1 = PROMPT_combination_1.replace("<PRODUCT_NAME>", product_name)
+                PROMPT_combination_1 = PROMPT_combination_1.replace("<PRODUCT_COST>", product_price)
+                PROMPT_combination_1 = PROMPT_combination_1.replace("<PRODUCT_DESCRIPTION>", product_description)
+
+                PROMPT_combination_1 = PROMPT_combination_1.replace("<PLATFORM_1>", platform_A)
+                PROMPT_combination_1 = PROMPT_combination_1.replace("<PLATFORM_2>", platform_B)
+
+                ls_2_combination_prompts.append(PROMPT_combination_1)
+                ls_2_combination_sources.append((platform_A, platform_B))
+
+                # Combination 2 - PLATFORM_2 is placed first
+
+                PROMPT_combination_2 = PROMPT
+
+                PROMPT_combination_2 = PROMPT_combination_2.replace("<PRODUCT_NAME>", product_name)
+                PROMPT_combination_2 = PROMPT_combination_2.replace("<PRODUCT_COST>", product_price)
+                PROMPT_combination_2 = PROMPT_combination_2.replace("<PRODUCT_DESCRIPTION>", product_description)
+
+                PROMPT_combination_2 = PROMPT_combination_2.replace("<PLATFORM_1>", platform_B)
+                PROMPT_combination_2 = PROMPT_combination_2.replace("<PLATFORM_2>", platform_A)
+
+                ls_2_combination_prompts.append(PROMPT_combination_2)
+                ls_2_combination_sources.append((platform_B, platform_A))
+
             all_combinations.append((ls_2_combination_prompts, ls_2_combination_sources))
     return all_combinations
 
-# Produce all source combinations
-all_combinations = produce_all_combinations()
-print(f"Number of pair wise prompts: {len(all_combinations)}")
-print(f"Number of pair wise sources: {len(all_combinations)}")
+
+print("Product Data: ", product_data)
+
+product_categories = list(product_data.keys())
+
+finished = []
+
+all_combinations = produce_all_data_combinations(product_data)
+
+print("Total combinations: ", len(all_combinations))
+print(len(all_combinations[0]), "prompts in the first combination.")
+# exit()
+
+print("Sample Prompt: ", all_combinations[0][0][0])
+print("Sample Source: ", all_combinations[0][1][0])
 
 # exit()
-print(len(all_combinations[0]))
-print(len(all_combinations[1]))
-print(len(all_combinations[0][0]))
-print(len(all_combinations[0][1]))
 
-print("all_combinations[0]", all_combinations[0])
-print("all_combinations[1]", all_combinations[1])
-print("all_combinations[0][0]", all_combinations[0][0])
-print("all_combinations[0][1]", all_combinations[0][1])
-print("all_combinations[0][0][0]", all_combinations[0][0][0])
-print("all_combinations[0][1][0]", all_combinations[0][1][0])
-print()
+combined_combinations = all_combinations
 
+class ProductPreferenceEnum(str, Enum):
+    Product1 = "Product 1"
+    Product2 = "Product 2"
 
-class EcommercePlatformPreferenceEnum(str, Enum):
-    EcommercePlatform1 = "Ecommerce Platform 1"
-    EcommercePlatform2 = "Ecommerce Platform 2"
-
-class EcommercePlatformPreference(BaseModel):
-    preference: EcommercePlatformPreferenceEnum
+class ProductPreference(BaseModel):
+    preference: ProductPreferenceEnum
     explanation: str
+
 
 if 'azure' in model_name:
     print("Using Azure OpenAI API")
@@ -229,11 +268,9 @@ elif 'gpt' in model_name and 'azure' not in model_name:
 else:
     print("Using local OpenAI API server")
     client = openai.Client(base_url=f"http://127.0.0.1:{PORT}/v1", api_key="None")
-time.sleep(5)
 
-def pick_source(SYSTEM_PROMPT, PROMPT):
+def pick_research_paper(SYSTEM_PROMPT, PROMPT):
     try:
-
         model_name = MODEL_NAME.replace("azure--", "")
 
         if 'Qwen2.5' in model_name:
@@ -251,7 +288,7 @@ def pick_source(SYSTEM_PROMPT, PROMPT):
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": PROMPT},
             ],
-            response_format=EcommercePlatformPreference,
+            response_format=ProductPreference,
             seed=SEED,
             max_tokens=1000,
             temperature=0,
@@ -273,10 +310,12 @@ def pick_source(SYSTEM_PROMPT, PROMPT):
                         {"role": "system", "content": SYSTEM_PROMPT_CONCISE},
                         {"role": "user", "content": PROMPT},
                     ],
-                    response_format=EcommercePlatformPreference,
+                    response_format=ProductPreference,
                     seed=SEED,
                     max_tokens=1000,
                     temperature=0,
+                    logit_bias=logit_bias,
+                    frequency_penalty=2
                 )
 
                 return completion.choices[0].message.parsed, SYSTEM_PROMPT_CONCISE, PROMPT
@@ -288,7 +327,6 @@ def check_output_exists(file_name):
     print(f"Output {file_name} exists: {exists}")
     return exists
 
-
 import concurrent.futures
 from tqdm import tqdm
 
@@ -298,7 +336,7 @@ def process_prompt(i, j, prompt, source_tuple):
         print(f'Output {i}_{j} already exists. Skipping...')
         return None
 
-    returned_val = pick_source(SYSTEM_PROMPT, prompt)
+    returned_val = pick_research_paper(SYSTEM_PROMPT, prompt)
 
     if returned_val is None:
         print(f"Error processing prompt {i}_{j}. Skipping...")
@@ -314,17 +352,12 @@ def process_prompt(i, j, prompt, source_tuple):
         'Sources': source_tuple  # Correctly passing the source tuple here
     }
 
-    # print(output_data)
-
-    print("Saving Output Data to", f"'{output_folder}/output_{i}_{j}.json'")
-
     with open(f'{output_folder}/output_{i}_{j}.json', 'w') as f:
         json.dump(output_data, f)
 
-    print("Saved to ", f'{output_folder}/output_{i}_{j}.json')
-
-    print(f"Processed Combination {i} - Prompt {j}")
+    # print(f"Processed Combination {i} - Prompt {j}")
     return f"Output saved for {i}_{j}"
+
 
 def process_combinations(i, sublist):
     """Process a batch of prompts in parallel."""
@@ -332,33 +365,29 @@ def process_combinations(i, sublist):
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         futures = {
-            executor.submit(process_prompt, i, j, prompt, source_tuple): (i, j)
-            for j, (prompt, source_tuple) in enumerate(zip(all_prompts, all_source_tuples))
+            executor.submit(process_prompt, i, j, prompt, all_source_tuples[j]): (i, j)  
+            for j, prompt in enumerate(all_prompts) if not check_output_exists(f'output_{i}_{j}.json')
         }
+
         for future in concurrent.futures.as_completed(futures):
             result = future.result()
             if result:
                 print(result)
 
-    print(f"Processed Combination {i} - Batch of {len(sublist)} prompts")
+    return f"Processed all prompts for sublist {i}"
 
-combined_combinations_subset = all_combinations
+
+combined_combinations_subset = combined_combinations
 
 if MODE == "test":
-    combined_combinations_subset = all_combinations[:1]
+    combined_combinations_subset = combined_combinations[:2]
 
-# Set the number of workers based on your system's capability
-if 'azure--gpt-4.1-nano' in MODEL_NAME:
-    MAX_WORKERS=300
-if 'azure--gpt-4.1-mini' in MODEL_NAME:
-    MAX_WORKERS=300
-else:
-    MAX_WORKERS = 20
-
+MAX_WORKERS = 20
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
     futures = {executor.submit(process_combinations, i, sub_list): i for i, sub_list in enumerate(combined_combinations_subset)}
-    for future in concurrent.futures.as_completed(futures):
+
+    for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures)):
         result = future.result()  # Fetch result or handle exceptions
         if result:
             print(result)
@@ -368,10 +397,8 @@ with open(f'{output_folder}/combined_combinations_subset.json', 'w') as f:
     json.dump(combined_combinations_subset, f)
 
 print("All outputs saved.")
-# Kill the server process
 
 if not "gpt" in MODEL_NAME:
     terminate_process(SERVER_PROCESS)
-
 print("Server process terminated.")
 print("All done!")

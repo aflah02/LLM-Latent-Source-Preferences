@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+import os
 import json
 from pydantic import BaseModel
 import random
@@ -9,12 +10,14 @@ import openai
 from enum import Enum
 from tqdm import tqdm
 import argparse
+import os
+import time
 
-argparser = argparse.ArgumentParser(description="NADE Standardized Experiment")
+argparser = argparse.ArgumentParser()
 argparser.add_argument("--seed", type=int)
 argparser.add_argument("--mode", type=str)
 argparser.add_argument("--badge_to_use", type=str)
-argparser.add_argument("--model_name", type=str, default="")
+argparser.add_argument("--model_name", type=str)
 
 args = argparser.parse_args()
 SEED = args.seed
@@ -55,15 +58,15 @@ if "ORIGINAL_WORKDIR" not in os.environ:
 
 # Change directory only if not already changed
 if os.getcwd() == os.environ["ORIGINAL_WORKDIR"]:
-    os.chdir("../../")
+    os.chdir("../")
 else:
     print("Already changed directory")
 
 print(os.getcwd())  # Confirm the change
 
 badge_file_path_mapping = {
-    "H5-Index": "Artifacts/Research/top_10_conferences_per_subcategory_to_h5_index_mapping.json",
-    "H5-Median": "Artifacts/Research/top_10_conferences_per_subcategory_to_h5_median_mapping.json",
+    "H5-Index": "Artifacts/top_10_conferences_per_subcategory_to_h5_index_mapping.json",
+    "H5-Median": "Artifacts/top_10_conferences_per_subcategory_to_h5_median_mapping.json",
 }
 
 badge_prompt_modifier_mapping = {
@@ -84,7 +87,7 @@ for file_path in badge_file_path_mapping.values():
     assert os.path.exists(file_path), f"File {file_path} does not exist."
 
 
-source_data_path = 'Artifacts/Research/top_10_conferences_per_subcategory.json'
+source_data_path = 'Artifacts/top_10_conferences_per_subcategory.json'
 
 badge_map_file_path = None
 if BADGE_TO_USE in badge_file_path_mapping.keys():
@@ -214,6 +217,7 @@ all_combinations = produce_all_venue_combinations()
 print(f"Number of pair wise prompts: {len(all_combinations)}")
 print(f"Number of pair wise sources: {len(all_combinations)}")
 
+# exit()
 print(len(all_combinations[0]))
 print(len(all_combinations[1]))
 print(len(all_combinations[0][0]))
@@ -223,6 +227,9 @@ print(all_combinations[0])
 print(all_combinations[1])
 print(all_combinations[0][0])
 print(all_combinations[0][1])
+
+# exit()
+
 
 class PublicationVenuePreferenceEnum(str, Enum):
     PublicationVenue1 = "Publication Venue 1"
@@ -237,7 +244,6 @@ if 'azure' in model_name:
     endpoint = os.getenv("AZURE_ENDPOINT_URL")
     deployment = MODEL_NAME.split("--")[-1]
     subscription_key = os.getenv("AZURE_OPENAI_SUBSCRIPTION_KEY")
-    # print(subscription_key)
     client = AzureOpenAI(
         azure_endpoint=endpoint,
         api_key=subscription_key,
@@ -251,6 +257,7 @@ else:
     print("Using local OpenAI API server")
     client = openai.Client(base_url=f"http://127.0.0.1:{PORT}/v1", api_key="None")
 
+time.sleep(5)
 
 def pick_source(SYSTEM_PROMPT, PROMPT):
     try:
@@ -283,8 +290,6 @@ def pick_source(SYSTEM_PROMPT, PROMPT):
         return completion.choices[0].message.parsed, SYSTEM_PROMPT, PROMPT
     except Exception as e:
         print(f"Error in API call: {e} | {str(e.__traceback__)}")
-        # print(f"System Prompt: {SYSTEM_PROMPT}")
-        # print(f"User Prompt: {PROMPT}")
         if 'length limit' in str(e):
             try:
                 print("-------- Retrying Length Limit -------")

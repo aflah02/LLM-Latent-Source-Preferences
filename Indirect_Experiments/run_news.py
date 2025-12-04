@@ -68,15 +68,15 @@ else:
 print(os.getcwd())  # Confirm the change
 
 badge_file_path_mapping = {
-    "X_Handle": "Artifacts/top_20_sources_per_leaning_to_x_account_handle_v3_aligned_with_cde_standardized_v1.json",
-    "X_Followers": "Artifacts/top_20_sources_per_leaning_to_x_account_followers_v3_aligned_with_cde_standardized_v1.json",
-    "X_URL": "Artifacts/top_20_sources_per_leaning_to_x_account_url_v3_aligned_with_cde_standardized_v1.json",
-    "Instagram_Handle": "Artifacts/top_20_sources_per_leaning_to_instagram_account_handle_v3_aligned_with_cde_standardized_v1.json",
-    "Instagram_Followers": "Artifacts/top_20_sources_per_leaning_to_instagram_account_followers_v3_aligned_with_cde_standardized_v1.json",
-    "Instagram_URL": "Artifacts/top_20_sources_per_leaning_to_instagram_account_url_v3_aligned_with_cde_standardized_v1.json",
-    "URL": "Artifacts/top_20_sources_per_leaning_to_url_v3_aligned_with_cde_standardized_v1.json",
-    "Year_of_Establishment": "Artifacts/top_20_sources_per_leaning_to_year_of_establishment_v3_aligned_with_cde_standardized_v1.json",
-    "Years_Since_Establishment": "Artifacts/top_20_sources_per_leaning_to_years_since_establishment_v3_aligned_with_cde_standardized_v1.json"
+    "X_Handle": "Artifacts/News/top_20_sources_per_leaning_to_x_account_handle.json",
+    "X_Followers": "Artifacts/News/top_20_sources_per_leaning_to_x_account_followers.json",
+    "X_URL": "Artifacts/News/top_20_sources_per_leaning_to_x_account_url.json",
+    "Instagram_Handle": "Artifacts/News/top_20_sources_per_leaning_to_instagram_account_handle.json",
+    "Instagram_Followers": "Artifacts/News/top_20_sources_per_leaning_to_instagram_account_followers.json",
+    "Instagram_URL": "Artifacts/News/top_20_sources_per_leaning_to_instagram_account_url.json",
+    "URL": "Artifacts/News/top_20_sources_per_leaning_to_url.json",
+    "Year_of_Establishment": "Artifacts/News/top_20_sources_per_leaning_to_year_of_establishment.json",
+    "Years_Since_Establishment": "Artifacts/News/top_20_sources_per_leaning_to_years_since_establishment.json"
 }
 
 badge_prompt_modifier_mapping = {
@@ -98,8 +98,8 @@ for file_path in badge_file_path_mapping.values():
     assert os.path.exists(file_path), f"File {file_path} does not exist."
 
 
-source_data_path = 'Artifacts/top_20_sources_per_leaning_as_per_freq_v2.json'
-diff_style_data_path = 'Artifacts/standardized_dsde_v2_data.json'
+source_data_path = 'Artifacts/News/top_20_sources_per_leaning_as_per_freq.json'
+diff_style_data_path = 'Artifacts/News/article_data.json'
 badge_map_file_path = None
 if BADGE_TO_USE in badge_file_path_mapping.keys():
     badge_map_file_path = badge_file_path_mapping[BADGE_TO_USE]
@@ -297,15 +297,11 @@ print(len(all_combinations_left_center))
 print(len(all_combinations_right_center))
 print(len(all_combinations_center_center))
 
-# exit()
-
 print("all_combinations_left_right[0][0][0] \n", all_combinations_left_right[0][0][0])
 
 print("all_combinations_left_right[0][1][0]) \n", all_combinations_left_right[0][1][0])
 
 print("System Prompt: \n", SYSTEM_PROMPT)
-
-# exit()
 
 class ArticlePreferenceEnum(str, Enum):
     Article1 = "Article 1"

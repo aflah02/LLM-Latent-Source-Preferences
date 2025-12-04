@@ -1,7 +1,5 @@
 import os
-
 from dotenv import load_dotenv
-import os
 import json
 from pydantic import BaseModel
 import random
@@ -11,7 +9,7 @@ import openai
 from enum import Enum
 from tqdm import tqdm
 import argparse
-import os
+
 
 argparser = argparse.ArgumentParser(description="DSDE Standardized Experiment")
 argparser.add_argument("--data_domain", type=str)
@@ -69,9 +67,9 @@ else:
 print(os.getcwd())  # Confirm the change
 
 badge_file_path_mapping = {
-    "X_Handle": "Artifacts/top_20_sources_per_region_to_x_account_handle.json",
-    "X_URL": "Artifacts/top_20_sources_per_region_to_x_account_url.json",
-    "URL": "Artifacts/top_20_sources_per_region_to_url.json",
+    "X_Handle": "Artifacts/News/Diff_Country/top_20_sources_per_region_to_x_account_handle.json",
+    "X_URL": "Artifacts/News/Diff_Country/top_20_sources_per_region_to_x_account_url.json",
+    "URL": "Artifacts/News/Diff_Country/top_20_sources_per_region_to_url.json",
 }
 
 badge_prompt_modifier_mapping = {
@@ -87,8 +85,8 @@ for file_path in badge_file_path_mapping.values():
     assert os.path.exists(file_path), f"File {file_path} does not exist."
 
 
-source_data_path = 'Artifacts/top_20_sources_per_region_to_category.json'
-diff_style_data_path = 'Artifacts/standardized_dsde_v2_data.json'
+source_data_path = 'Artifacts/News/Diff_Country/top_20_sources_per_region_to_category.json'
+diff_style_data_path = 'Artifacts/News/article_data.json'
 badge_map_file_path = None
 if BADGE_TO_USE in badge_file_path_mapping.keys():
     badge_map_file_path = badge_file_path_mapping[BADGE_TO_USE]

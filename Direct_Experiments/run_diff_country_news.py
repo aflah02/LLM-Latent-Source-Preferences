@@ -12,7 +12,7 @@ from tqdm import tqdm
 import argparse
 import os
 
-argparser = argparse.ArgumentParser()
+argparser = argparse.ArgumentParser(description="")
 argparser.add_argument("--seed", type=int)
 argparser.add_argument("--mode", type=str)
 argparser.add_argument("--badge_to_use", type=str)
@@ -57,35 +57,23 @@ if "ORIGINAL_WORKDIR" not in os.environ:
 
 # Change directory only if not already changed
 if os.getcwd() == os.environ["ORIGINAL_WORKDIR"]:
-    os.chdir("../")
+    os.chdir("../../")
 else:
     print("Already changed directory")
 
 print(os.getcwd())  # Confirm the change
 
 badge_file_path_mapping = {
-    "X_Handle": "Artifacts/top_20_sources_per_leaning_to_x_account_handle_v3_aligned_with_cde_standardized_v1.json",
-    "X_Followers": "Artifacts/top_20_sources_per_leaning_to_x_account_followers_v3_aligned_with_cde_standardized_v1.json",
-    "X_URL": "Artifacts/top_20_sources_per_leaning_to_x_account_url_v3_aligned_with_cde_standardized_v1.json",
-    "Instagram_Handle": "Artifacts/top_20_sources_per_leaning_to_instagram_account_handle_v3_aligned_with_cde_standardized_v1.json",
-    "Instagram_Followers": "Artifacts/top_20_sources_per_leaning_to_instagram_account_followers_v3_aligned_with_cde_standardized_v1.json",
-    "Instagram_URL": "Artifacts/top_20_sources_per_leaning_to_instagram_account_url_v3_aligned_with_cde_standardized_v1.json",
-    "URL": "Artifacts/top_20_sources_per_leaning_to_url_v3_aligned_with_cde_standardized_v1.json",
-    "Year_of_Establishment": "Artifacts/top_20_sources_per_leaning_to_year_of_establishment_v3_aligned_with_cde_standardized_v1.json",
-    "Years_Since_Establishment": "Artifacts/top_20_sources_per_leaning_to_years_since_establishment_v3_aligned_with_cde_standardized_v1.json"
+    "X_Handle": "Artifacts/News/Diff_Country/top_20_sources_per_region_to_x_account_handle.json",
+    "X_URL": "Artifacts/News/Diff_Country/top_20_sources_per_region_to_x_account_url.json",
+    "URL": "Artifacts/News/Diff_Country/top_20_sources_per_region_to_url.json",
 }
 
 badge_prompt_modifier_mapping = {
-    "X_Handle": "X (Formerly Twitter) Account Handle of Source",
-    "X_Followers": "X (Formerly Twitter) Account Followers of Source",
-    "X_URL": "X (Formerly Twitter) Account URL of Source",
-    "Instagram_Handle": "Instagram Account Handle of Source",
-    "Instagram_Followers": "Instagram Account Followers of Source",
-    "Instagram_URL": "Instagram Account URL of Source",
-    "URL": "Source Website",
-    "Year_of_Establishment": "Year of Establishment of Source",
-    "Years_Since_Establishment": "Years Since Establishment of Source",
-    "Base": "Source",
+    "X_Handle": "X (Formerly Twitter) Account Handle of the Source:",
+    "X_URL": "X (Formerly Twitter) Account URL of the Source:",
+    "URL": "Source Website:",
+    "Base": "Source:",
 }
 
 
@@ -108,7 +96,7 @@ for file_path in badge_file_path_mapping.values():
     assert os.path.exists(file_path), f"File {file_path} does not exist."
 
 
-source_data_path = 'Artifacts/top_20_sources_per_leaning_as_per_freq_v2.json'
+source_data_path = 'Artifacts/News/Diff_Country/top_20_sources_per_region_to_category.json'
 
 badge_map_file_path = None
 if BADGE_TO_USE in badge_file_path_mapping.keys():
@@ -121,12 +109,10 @@ if badge_map_file_path:
     badge_map = json.load(open(badge_map_file_path))
 else:
     badge_map = {}
-    for source in source_data['left']:
-        badge_map[source] = source
-    for source in source_data['right']:
-        badge_map[source] = source
-    for source in source_data['center']:
-        badge_map[source] = source
+    keys = list(source_data.keys())
+    for key in keys:
+        for item in source_data[key]:
+            badge_map[item] = item
 
 # Typecase all k,v pairs in badge_map to str
 for k, v in badge_map.items():
@@ -138,10 +124,10 @@ model_name = MODEL_NAME
 model_name_for_output_folder = model_name.split('/')[-1]
 
 if 'gpt' in model_name and 'azure' not in model_name:
-    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_A_News/azure--{model_name_for_output_folder}/{BADGE_TO_USE}/{SEED}/"
+    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_A_Diff_Country_News/azure--{model_name_for_output_folder}/{BADGE_TO_USE}/{SEED}/"
     os.makedirs(output_folder, exist_ok=True)
 else:
-    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_A_News/{model_name_for_output_folder}/{BADGE_TO_USE}/{SEED}/"
+    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_A_Diff_Country_News/{model_name_for_output_folder}/{BADGE_TO_USE}/{SEED}/"
     os.makedirs(output_folder, exist_ok=True)
 
 load_dotenv()
@@ -179,187 +165,38 @@ print(f"Prompt Template: \n {PROMPT}")
 print(f"System Prompt: \n {SYSTEM_PROMPT}")
 
 
-def produce_all_source_combinations():
+def produce_all_source_combinations(source_data_A, source_data_B):
     all_combinations = []
-
-    left_leaning_sources = source_data['left']
-    right_leaning_sources = source_data['right']
-    center_sources = source_data['center']
-
     # Add all pair wise left_leaning_sources
 
     seen_combinations = []
 
-    for i in range(len(left_leaning_sources)):
-        for j in range(i+1, len(left_leaning_sources)):
+    for i in range(len(source_data_A)):
+        for j in range(len(source_data_B)):
 
             # Check if the combination has already been seen
-            if (left_leaning_sources[i], left_leaning_sources[j]) in seen_combinations or (left_leaning_sources[j], left_leaning_sources[i]) in seen_combinations:
-                print(f"Skipping already seen combination: {left_leaning_sources[i]} and {left_leaning_sources[j]}")
+            if (source_data_A[i], source_data_B[j]) in seen_combinations or (source_data_B[j], source_data_A[i]) in seen_combinations:
+                print(f"Skipping already seen combination: {source_data_A[i]} and {source_data_B[j]}")
                 continue
 
-            seen_combinations.append((left_leaning_sources[i], left_leaning_sources[j]))
+            if source_data_A[i] == source_data_B[j]:
+                print(f"Skipping same source combination: {source_data_A[i]} and {source_data_B[j]}")
+                continue
+
+            seen_combinations.append((source_data_A[i], source_data_B[j]))
 
             ls_2_combination_prompts = []
             ls_2_combination_sources = []
 
             # Combination 1 - i is source 1 and j is source 2
-            source1 = left_leaning_sources[i]
-            source2 = left_leaning_sources[j]
+            source1 = source_data_A[i]
+            source2 = source_data_B[j]
             ls_2_combination_prompts.append(PROMPT.replace("<source1>", badge_map[source1]).replace("<source2>", badge_map[source2]))
             ls_2_combination_sources.append((source1, source2))
             
             # Combination 2 - j is source 1 and i is source 2
-            source1 = left_leaning_sources[j]
-            source2 = left_leaning_sources[i]
-            ls_2_combination_prompts.append(PROMPT.replace("<source1>", badge_map[source1]).replace("<source2>", badge_map[source2]))
-            ls_2_combination_sources.append((source1, source2))
-
-            all_combinations.append((ls_2_combination_prompts, ls_2_combination_sources))
-
-    # Add all pair wise right_leaning_sources
-    for i in range(len(right_leaning_sources)):
-        for j in range(i+1, len(right_leaning_sources)):
-
-            # Check if the combination has already been seen
-            if (right_leaning_sources[i], right_leaning_sources[j]) in seen_combinations or (right_leaning_sources[j], right_leaning_sources[i]) in seen_combinations:
-                print(f"Skipping already seen combination: {right_leaning_sources[i]} and {right_leaning_sources[j]}")
-                continue
-
-            seen_combinations.append((right_leaning_sources[i], right_leaning_sources[j]))
-            
-            ls_2_combination_prompts = []
-            ls_2_combination_sources = []
-
-            # Combination 1 - i is source 1 and j is source 2
-            source1 = right_leaning_sources[i]
-            source2 = right_leaning_sources[j]
-            ls_2_combination_prompts.append(PROMPT.replace("<source1>", badge_map[source1]).replace("<source2>", badge_map[source2]))
-            ls_2_combination_sources.append((source1, source2))
-            
-            # Combination 2 - j is source 1 and i is source 2
-            source1 = right_leaning_sources[j]
-            source2 = right_leaning_sources[i]
-            ls_2_combination_prompts.append(PROMPT.replace("<source1>", badge_map[source1]).replace("<source2>", badge_map[source2]))
-            ls_2_combination_sources.append((source1, source2))
-
-            all_combinations.append((ls_2_combination_prompts, ls_2_combination_sources))
-
-    # Add all pair wise center_sources
-    for i in range(len(center_sources)):
-        for j in range(i+1, len(center_sources)):
-
-            # Check if the combination has already been seen
-            if (center_sources[i], center_sources[j]) in seen_combinations or (center_sources[j], center_sources[i]) in seen_combinations:
-                print(f"Skipping already seen combination: {center_sources[i]} and {center_sources[j]}")
-                continue
-
-            seen_combinations.append((center_sources[i], center_sources[j]))
-            
-            ls_2_combination_prompts = []
-            ls_2_combination_sources = []
-
-            # Combination 1 - i is source 1 and j is source 2
-            source1 = center_sources[i]
-            source2 = center_sources[j]
-            ls_2_combination_prompts.append(PROMPT.replace("<source1>", badge_map[source1]).replace("<source2>", badge_map[source2]))
-            ls_2_combination_sources.append((source1, source2))
-            
-            # Combination 2 - j is source 1 and i is source 2
-            source1 = center_sources[j]
-            source2 = center_sources[i]
-            ls_2_combination_prompts.append(PROMPT.replace("<source1>", badge_map[source1]).replace("<source2>", badge_map[source2]))
-            ls_2_combination_sources.append((source1, source2))
-
-            all_combinations.append((ls_2_combination_prompts, ls_2_combination_sources))
-
-    # Add all pair wise left_leaning_sources vs right_leaning_sources
-    for i in range(len(left_leaning_sources)):
-        for j in range(len(right_leaning_sources)):
-
-            # Check if the combination has already been seen
-            if (left_leaning_sources[i], right_leaning_sources[j]) in seen_combinations or (right_leaning_sources[j], left_leaning_sources[i]) in seen_combinations:
-                print(f"Skipping already seen combination: {left_leaning_sources[i]} and {right_leaning_sources[j]}")
-                continue
-            
-            seen_combinations.append((left_leaning_sources[i], right_leaning_sources[j]))
-
-            ls_2_combination_prompts = []
-            ls_2_combination_sources = []
-
-            # Combination 1 - i is source 1 and j is source 2
-            source1 = left_leaning_sources[i]
-            source2 = right_leaning_sources[j]
-            ls_2_combination_prompts.append(PROMPT.replace("<source1>", badge_map[source1]).replace("<source2>", badge_map[source2]))
-            ls_2_combination_sources.append((source1, source2))
-
-            # Combination 2 - j is source 1 and i is source 2
-            source1 = right_leaning_sources[j]
-            source2 = left_leaning_sources[i]
-            ls_2_combination_prompts.append(PROMPT.replace("<source1>", badge_map[source1]).replace("<source2>", badge_map[source2]))
-            ls_2_combination_sources.append((source1, source2))
-
-            all_combinations.append((ls_2_combination_prompts, ls_2_combination_sources))
-
-
-    # Add all pair wise left_leaning_sources vs center_sources
-    for i in range(len(left_leaning_sources)):
-        for j in range(len(center_sources)):
-
-            # Check if the combination has already been seen
-            if (left_leaning_sources[i], center_sources[j]) in seen_combinations or (center_sources[j], left_leaning_sources[i]) in seen_combinations:
-                print(f"Skipping already seen combination: {left_leaning_sources[i]} and {center_sources[j]}")
-                continue
-            
-            seen_combinations.append((left_leaning_sources[i], center_sources[j]))
-
-            ls_2_combination_prompts = []
-            ls_2_combination_sources = []
-
-            # Combination 1 - i is source 1 and j is source 2
-
-            source1 = left_leaning_sources[i]
-            source2 = center_sources[j]
-
-            ls_2_combination_prompts.append(PROMPT.replace("<source1>", badge_map[source1]).replace("<source2>", badge_map[source2]))
-            ls_2_combination_sources.append((source1, source2))
-
-            # Combination 2 - j is source 1 and i is source 2
-            source1 = center_sources[j]
-            source2 = left_leaning_sources[i]
-
-            ls_2_combination_prompts.append(PROMPT.replace("<source1>", badge_map[source1]).replace("<source2>", badge_map[source2]))
-            ls_2_combination_sources.append((source1, source2))
-            all_combinations.append((ls_2_combination_prompts, ls_2_combination_sources))
-
-            
-            
-
-    # Add all pair wise right_leaning_sources vs center_sources
-    for i in range(len(right_leaning_sources)):
-        for j in range(len(center_sources)):
-
-            # Check if the combination has already been seen
-            if (right_leaning_sources[i], center_sources[j]) in seen_combinations or (center_sources[j], right_leaning_sources[i]) in seen_combinations:
-                print(f"Skipping already seen combination: {right_leaning_sources[i]} and {center_sources[j]}")
-                continue
-
-            seen_combinations.append((right_leaning_sources[i], center_sources[j]))
-
-            ls_2_combination_prompts = []
-            ls_2_combination_sources = []
-
-            # Combination 1 - i is source 1 and j is source 2
-            source1 = right_leaning_sources[i]
-            source2 = center_sources[j]
-
-            ls_2_combination_prompts.append(PROMPT.replace("<source1>", badge_map[source1]).replace("<source2>", badge_map[source2]))
-            ls_2_combination_sources.append((source1, source2))
-
-            # Combination 2 - j is source 1 and i is source 2
-            source1 = center_sources[j]
-            source2 = right_leaning_sources[i]
-
+            source1 = source_data_B[j]
+            source2 = source_data_A[i]
             ls_2_combination_prompts.append(PROMPT.replace("<source1>", badge_map[source1]).replace("<source2>", badge_map[source2]))
             ls_2_combination_sources.append((source1, source2))
 
@@ -368,9 +205,26 @@ def produce_all_source_combinations():
     return all_combinations
 
 # Produce all source combinations
-all_combinations = produce_all_source_combinations()
+
+news_categories = list(source_data.keys())
+
+all_combinations = []
+
+finished = []
+
+for key1 in news_categories:
+    for key2 in news_categories:
+        if (key1, key2) in finished or (key2, key1) in finished:
+            print(f"Skipping {key1} and {key2} as they are already processed.")
+            continue
+        print(f"Producing combinations for {key1} and {key2}")
+        all_combinations += produce_all_source_combinations(source_data[key1], source_data[key2])
+        finished.append((key1, key2))
+
 print(f"Number of pair wise prompts: {len(all_combinations)}")
 print(f"Number of pair wise sources: {len(all_combinations)}")
+
+assert len(all_combinations) == 1770
 
 print(len(all_combinations[0]))
 print(len(all_combinations[1]))
@@ -396,11 +250,13 @@ class SourcePreference(BaseModel):
     preference: SourcePreferenceEnum
     explanation: str
 
+
 if 'azure' in model_name:
     print("Using Azure OpenAI API")
     endpoint = os.getenv("AZURE_ENDPOINT_URL")
     deployment = MODEL_NAME.split("--")[-1]
     subscription_key = os.getenv("AZURE_OPENAI_SUBSCRIPTION_KEY")
+    # print(subscription_key)
     client = AzureOpenAI(
         azure_endpoint=endpoint,
         api_key=subscription_key,
@@ -442,6 +298,7 @@ def pick_source(SYSTEM_PROMPT, PROMPT):
             frequency_penalty=2
         )
 
+
         return completion.choices[0].message.parsed, SYSTEM_PROMPT, PROMPT
     except Exception as e:
         print(f"Error in API call: {e} | {str(e.__traceback__)}")
@@ -468,9 +325,9 @@ def pick_source(SYSTEM_PROMPT, PROMPT):
             except Exception as e:
                 print(f"Error occurred while parsing response: {e}")
 
+
 def check_output_exists(file_name):
     exists = os.path.exists(f'{output_folder}/' + file_name)
-    # print(f"Output {file_name} exists: {exists} in {output_folder}")
     return exists
 
 
@@ -526,13 +383,7 @@ combined_combinations_subset = all_combinations
 if MODE == "test":
     combined_combinations_subset = all_combinations[:2]
 
-# Set the number of workers based on your system's capability
-if 'azure--gpt-4.1-nano' in MODEL_NAME:
-    MAX_WORKERS=300
-if 'azure--gpt-4.1-mini' in MODEL_NAME:
-    MAX_WORKERS=300
-else:
-    MAX_WORKERS = 100
+MAX_WORKERS = 20
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
     futures = {executor.submit(process_combinations, i, sub_list): i for i, sub_list in enumerate(combined_combinations_subset)}
@@ -547,6 +398,7 @@ with open(f'{output_folder}/combined_combinations_subset.json', 'w') as f:
     json.dump(combined_combinations_subset, f)
 
 print("All outputs saved.")
+# Kill the server process
 
 if not "gpt" in MODEL_NAME:
     terminate_process(SERVER_PROCESS)
