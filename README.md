@@ -24,7 +24,7 @@ AZURE_OPENAI_SUBSCRIPTION_KEY=your_azure_subscription_key_here
 
 3. To run experiments using the OpenAI APIs you can just install the dependencies mentioned in `requirements.txt`. The experiments were run using Python 3.11.2
 
-For experiments involving local models we use SGLang the SGLang docker container -
+For experiments involving local models we use the SGLang docker container -
 
 ```
 docker run --gpus all -it \
