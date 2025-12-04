@@ -10,11 +10,11 @@ from enum import Enum
 from tqdm import tqdm
 import argparse
 
-argparser = argparse.ArgumentParser(description="NADE Standardized Experiment")
+argparser = argparse.ArgumentParser(description="")
 argparser.add_argument("--seed", type=int)
 argparser.add_argument("--mode", type=str)
 argparser.add_argument("--badge_to_use", type=str)
-argparser.add_argument("--model_name", type=str, default="")
+argparser.add_argument("--model_name", type=str)
 
 args = argparser.parse_args()
 SEED = args.seed

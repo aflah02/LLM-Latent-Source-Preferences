@@ -1,15 +1,3 @@
-# python3 sgl_DSDE_Research.py --data_domain "Computational Linguistics" --badge_to_use Base --seed 107 --mode test --model azure--gpt-4.1-nano
-
-# CUDA_VISIBLE_DEVICES=0 python3 sgl_DSDE_Research.py --data_domain Athletics_and_Sports_Event --badge_to_use Base --seed 107 --mode prod --model_name mistralai/Ministral-8B-Instruct-2410
-
-import os
-
-# Run - pip install sglang-router
-
-os.environ['HF_HOME'] = '/NS/llm-artifacts/nobackup/HF_HOME'
-
-
-
 from dotenv import load_dotenv
 import os
 import json
@@ -23,12 +11,12 @@ from tqdm import tqdm
 import argparse
 import os
 
-argparser = argparse.ArgumentParser(description="CDE Standardized Experiment")
+argparser = argparse.ArgumentParser(description="")
 argparser.add_argument("--data_domain", type=str)
 argparser.add_argument("--seed", type=int)
 argparser.add_argument("--mode", type=str)
 argparser.add_argument("--badge_to_use", type=str)
-argparser.add_argument("--model_name", type=str, default="gpt-4o-mini-2024-07-18")
+argparser.add_argument("--model_name", type=str)
 
 args = argparser.parse_args()
 DATA_DOMAIN = args.data_domain
