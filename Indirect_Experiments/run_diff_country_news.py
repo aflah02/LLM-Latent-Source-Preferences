@@ -120,10 +120,10 @@ model_name = MODEL_NAME
 model_name_for_output_folder = model_name.split('/')[-1]
 
 if 'gpt' in model_name and 'azure' not in model_name:
-    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_B_Diff_Country_News/azure--{model_name_for_output_folder}/{BADGE_TO_USE}/{DATA_DOMAIN}/{SEED}/"
+    output_folder = f"Outputs/Type_B_Diff_Country_News/azure--{model_name_for_output_folder}/{BADGE_TO_USE}/{DATA_DOMAIN}/{SEED}/"
     os.makedirs(output_folder, exist_ok=True)
 else:
-    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_B_Diff_Country_News/{model_name_for_output_folder}/{BADGE_TO_USE}/{DATA_DOMAIN}/{SEED}/"
+    output_folder = f"Outputs/Type_B_Diff_Country_News/{model_name_for_output_folder}/{BADGE_TO_USE}/{DATA_DOMAIN}/{SEED}/"
     os.makedirs(output_folder, exist_ok=True)
 
 load_dotenv()

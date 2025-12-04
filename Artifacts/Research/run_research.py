@@ -114,7 +114,7 @@ print(f"Badge map", badge_map)
 model_name = MODEL_NAME
 model_name_for_output_folder = model_name.split('/')[-1]
 model_name_for_output_folder.replace('azure--', '')
-output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_A_Research/{model_name_for_output_folder}/{BADGE_TO_USE}/{SEED}/"
+output_folder = f"Outputs/Type_A_Research/{model_name_for_output_folder}/{BADGE_TO_USE}/{SEED}/"
 os.makedirs(output_folder, exist_ok=True)
 
 print(f"Output folder created at: {output_folder}")

@@ -105,10 +105,10 @@ model_name_for_output_folder = model_name.split('/')[-1]
 model_name_for_output_folder.replace('azure--', '')
 
 if 'gpt' in model_name and 'azure' not in model_name:
-    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_A_Ecommerce/azure--{model_name_for_output_folder}/{BADGE_TO_USE}/{SEED}/"
+    output_folder = f"Outputs/Type_A_Ecommerce/azure--{model_name_for_output_folder}/{BADGE_TO_USE}/{SEED}/"
     os.makedirs(output_folder, exist_ok=True)
 else:
-    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_A_Ecommerce/{model_name_for_output_folder}/{BADGE_TO_USE}/{SEED}/"
+    output_folder = f"Outputs/Type_A_Ecommerce/{model_name_for_output_folder}/{BADGE_TO_USE}/{SEED}/"
     os.makedirs(output_folder, exist_ok=True)
 
 print(f"Output folder created at: {output_folder}")

@@ -56,10 +56,10 @@ else:
 print(os.getcwd())  # Confirm the change
 
 if 'gpt' in model_name and 'azure' not in model_name:
-    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_Case_Study_1_AllSides/azure--{model_name.split('/')[-1]}/Left_Center_Swap/{seed}/"
+    output_folder = f"Outputs/Type_Case_Study_1_AllSides/azure--{model_name.split('/')[-1]}/Left_Center_Swap/{seed}/"
     os.makedirs(output_folder, exist_ok=True)
 else:
-    output_folder = f"/NS/ai-agents/nobackup/afkhan/LLM_Preference_Analysis/Outputs/Type_Case_Study_1_AllSides/{model_name.split('/')[-1]}/Left_Center_Swap/{seed}/"
+    output_folder = f"Outputs/Type_Case_Study_1_AllSides/{model_name.split('/')[-1]}/Left_Center_Swap/{seed}/"
     os.makedirs(output_folder, exist_ok=True)
 
 
