@@ -58,7 +58,7 @@ Folder: `Direct_Experiments/`
 
 ### How to run?
 
-Same as direct experiments
+Same as Indirect experiments
 
 ---
 
@@ -94,7 +94,33 @@ Contains all the datasets used by different experiments.
 
 Folder: `Outputs/`
 
-All the saves will be done in this folder.
+The scripts will save their outputs in this folder.
+
+---
+
+## Results
+
+We provide all experimental results in compressed form. During experimentation, each LLM inference output was saved as an individual JSON file to simplify debugging and reruns. However, distributing millions of JSON files is impractical, so we aggregate them into grouped files for sharing.
+
+Due to the large storage requirements, all results are hosted on HuggingFace:
+*[aflah/LLM-Latent-Preferences](https://huggingface.co/datasets/aflah/LLM-Latent-Preferences)*
+
+### Structure
+
+* **`A/`** – Results from the **Direct** experiments.
+  Each subfolder corresponds to one of the four tasks. Files within these subfolders follow the naming pattern:
+  `MODEL_NAME=BADGE_NAME=SEED`
+  Files are stored in Arrow IPC (Feather v2) format using Polars’ `write_ipc` API. Use Polars’ `read_ipc` API to load them.
+
+* **`B/`** – Results from the **Indirect** experiments.
+  The directory layout mirrors that of `A/`.
+
+* **`Case_Study_1_All_Sides`** – Results for **Case Study 1: AllSides News Choice**.
+  Each file is a JSON named using the convention:
+  `MODEL_CONFIG_SEED.json`
+
+* **`Case_Study_2_Amazon`** – Results for **Case Study 2: Amazon Seller Choice**.
+  The file structure and format match those in the `A/` directory.
 
 ---
 
