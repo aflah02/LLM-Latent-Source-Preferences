@@ -151,3 +151,26 @@ If you would like to cite our work, please use the following BibTeX entry:
   booktitle={ICML 2025 Workshop on Reliable and Responsible Foundation Models}
 }
 ```
+
+If you use the Amazon Seller Choice Dataset then please cite the original paper for that dataset:
+
+```bibtex
+@article{10.1145/3686994,
+author = {Dash, Abhisek and Chakraborty, Abhijnan and Ghosh, Saptarshi and Mukherjee, Animesh and Gummadi, Krishna P.},
+title = {Investigating Nudges toward Related Sellers on E-commerce Marketplaces: A Case Study on Amazon},
+year = {2024},
+issue_date = {November 2024},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {8},
+number = {CSCW2},
+url = {https://doi.org/10.1145/3686994},
+doi = {10.1145/3686994},
+abstract = {E-commerce marketplaces provide business opportunities to millions of sellers worldwide. Some of these sellers have special relationships with the marketplace by virtue of using their subsidiary services (e.g., fulfillment and/or shipping services provided by the marketplace) -- we refer to such sellers collectively as Related Sellers. When multiple sellers offer to sell the same product, the marketplace helps a customer in selecting an offer (by a seller) through (a) a default offer selection algorithm, (b) showing features about each of the offers and the corresponding sellers (price, seller performance metrics, seller's number of ratings etc.), and (c) finally evaluating the sellers along these features. In this paper, we perform an end-to-end investigation into how the above apparatus can nudge customers toward the Related Sellers on Amazon's four different marketplaces in India, USA, Germany and France. We find that given explicit choices, customers' preferred offers and algorithmically selected offers can be significantly different. We highlight that Amazon is adopting different performance metric evaluation policies for different sellers, potentially benefiting Related Sellers. For instance, such policies result in notable discrepancy between the actual performance metric and the presented performance metric of Related Sellers. We further observe that among the seller-centric features visible to customers, sellers' number of ratings influences their decisions the most, yet it may not reflect the true quality of service by the seller, rather reflecting the scale at which the seller operates, thereby implicitly steering customers toward larger Related Sellers. Moreover, when customers are shown the rectified metrics for the different sellers, their preference toward Related Sellers is almost halved. We believe our findings will inform and encourage further deliberation toward more effective governance of such design choices and policies adopted by e-commerce marketplaces.},
+journal = {Proc. ACM Hum.-Comput. Interact.},
+month = nov,
+articleno = {455},
+numpages = {31},
+keywords = {algorithmic auditing, choice architecture, e-commerce marketplace, nudges, preferential treatment, related sellers}
+}
+```
