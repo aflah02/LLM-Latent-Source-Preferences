@@ -69,7 +69,7 @@ else:
 load_dotenv()
 
 
-data_path = 'Artifacts/standardized_base_v1.json'
+data_path = 'Artifacts/AllSides_Data/data.json'
 
 
 data = json.load(open(data_path))
