@@ -145,10 +145,13 @@ The code for an earlier version accepted to `ICML 2025 Workshop on Reliable and 
 If you would like to cite our work, please use the following BibTeX entry:
 
 ```bibtex
-@inproceedings{khan2025agents,
-  title={In Agents We Trust, but Who Do Agents Trust? Latent Source Preferences Steer LLM Generations},
-  author={Khan, Mohammad Aflah and Amani, Mahsa and Das, Soumi and Ghosh, Bishwamittra and Wu, Qinyuan and Gummadi, Krishna P and Gupta, Manish and Ravichander, Abhilasha},
-  booktitle={ICML 2025 Workshop on Reliable and Responsible Foundation Models}
+@inproceedings{
+    khan2026in,
+    title={In Agents We Trust, but Who Do Agents Trust? Latent Preferences Steer {LLM} Generations},
+    author={Mohammad Aflah Khan and Mahsa Amani and Soumi Das and Bishwamittra Ghosh and Qinyuan Wu and Krishna P. Gummadi and Manish Gupta and Abhilasha Ravichander},
+    booktitle={The Fourteenth International Conference on Learning Representations},
+    year={2026},
+    url={https://openreview.net/forum?id=yTUNl6jYGU}
 }
 ```
 
