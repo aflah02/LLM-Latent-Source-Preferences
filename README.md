@@ -147,7 +147,7 @@ If you would like to cite our work, please use the following BibTeX entry:
 ```bibtex
 @inproceedings{
     khan2026in,
-    title={In Agents We Trust, but Who Do Agents Trust? Latent Preferences Steer {LLM} Generations},
+    title={In Agents We Trust, but Who Do Agents Trust? Latent Source Preferences Steer {LLM} Generations},
     author={Mohammad Aflah Khan and Mahsa Amani and Soumi Das and Bishwamittra Ghosh and Qinyuan Wu and Krishna P. Gummadi and Manish Gupta and Abhilasha Ravichander},
     booktitle={The Fourteenth International Conference on Learning Representations},
     year={2026},
