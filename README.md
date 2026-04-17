@@ -4,6 +4,9 @@ This repository contains the code and data for the paper "In Agents We Trust, bu
 
 The paper was accepted at ICLR 2026 and IASEAI 2026 (Non-Archival). An earlier version of this paper was presented at ICML 2025 Workshop on Reliable and Responsible Foundation Models and the code accompanying the same is present under the `ICML-R2-FM` branch of the repository. 
 
+<img width="2500" height="1224" alt="ICLR 2026 Poster - Agent Trust pptx" src="https://github.com/user-attachments/assets/32bfee2e-563e-446a-9796-93c5492eda3b" />
+
+
 ## Environment Setup
 
 1. Clone the repository:
