@@ -2,6 +2,8 @@
 
 This repository contains the code and data for the paper "In Agents We Trust, but Who Do Agents Trust? Latent Source Preferences Steer LLM Generations". The project investigates how Large Language Models (LLMs) exhibit latent preferences for different information sources, particularly in news article selection, academic paper ranking and ecommerce product recommendation tasks.
 
+The paper was accepted at ICLR 2026 and IASEAI 2026 (Non-Archival). An earlier version of this paper was presented at ICML 2025 Workshop on Reliable and Responsible Foundation Models and the code accompanying the same is present under the `ICML-R2-FM` branch of the repository. 
+
 ## Environment Setup
 
 1. Clone the repository:
@@ -135,8 +137,6 @@ Case_Study_2_Amazon_Seller_Choice/   # Case Study with Amazon Seller Data
 Outputs/                        # Results for Experiments are Saved Here
 README.md
 ```
-
-The code for an earlier version accepted to `ICML 2025 Workshop on Reliable and Responsible Foundation Models` is present under the `ICML-R2-FM` branch of the repository.
 
 ---
 
